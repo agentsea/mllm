@@ -1,21 +1,21 @@
-# yapr
+# MLLM
 
-yapr (Yet Another Prompt)
+MultiModal Large Language Models
 
 ## Installation
 
 ```sh
-pip install yapr
+pip install mllm
 ```
 
 ## Usage
 
-Create an LLM provider from the API keys found in the current system env vars
+Create an MLLM provider from the API keys found in the current system env vars
 
 ```python
-from yapr import LLMProvider, RoleThread
+from mllm import MLLM, RoleThread
 
-llm_provider = LLMProvider.from_env()
+mllm = MLLM.from_env()
 ```
 
 Create a new role based chat thread
@@ -25,11 +25,10 @@ thread = RoleThread()
 thread.post(role="user", msg="How are you?")
 ```
 
-Chat with the LLM, store the prompt data in the namespace "foo"
+Chat with the MLLM, store the prompt data in the namespace "foo"
 
 ```python
-response = llm_provider.chat(thread, namespace="foo")
-
+response = mllm.chat(thread, namespace="foo")
 thread.add_msg(response.msg)
 ```
 
@@ -44,22 +43,25 @@ class Foo(BaseModel):
 
 thread.post(role="user", msg="Given the {...} can you return that in JSON?")
 
-response = llm_provider.chat(thread, namespace="foo", response_schema=Foo)
+response = mllm.chat(thread, namespace="foo", response_schema=Foo)
 foo_parsed = response.parsed
 
 assert type(foo_parsed) == Foo
 ```
 
-Multimodal
+Find a saved thread or a prompt
 
 ```python
-
+RoleThread.find(id="123")
+Prompt.find(id="456)
 ```
 
 Just store prompts
 
 ```python
-from yapr import Prompt, RoleThread
+from mllm import Prompt, RoleThread
+
+thread = RoleThread()
 
 msg = {
     "role": "user",
@@ -75,12 +77,9 @@ msg = {
     ]
 }
 role_message = RoleMessage.from_openai(msg)
-
-thread = RoleThread()
 thread.add_msg(role_message)
 
 response = call_openai(thread.to_openai())
-
 response_msg = RoleMessage.from_openai(response["choices"][0]["message"])
 
 saved_prompt = Prompt(thread, response_msg, namespace="foo")

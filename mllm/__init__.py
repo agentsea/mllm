@@ -1,3 +1,3 @@
 from .prompt import Prompt, PromptModel
-from .llm import LLMProvider, LLMProviderOption, ChatResponse
+from .mllm import MLLM, MLLMOption, ChatResponse
 from threadmem import RoleMessage, RoleModel, RoleThread

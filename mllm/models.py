@@ -26,14 +26,14 @@ class EnvVarOptModel(BaseModel):
     options: List[str] = []
 
 
-class LLMProviders(BaseModel):
+class MLLMProviders(BaseModel):
     preference: List[str] = []
 
 
-class LLMProviderOption(BaseModel):
+class MLLMOption(BaseModel):
     model: str
     env_var: EnvVarOptModel
 
 
-class LLMProviderModel(BaseModel):
-    options: List[LLMProviderOption]
+class MLLMModel(BaseModel):
+    options: List[MLLMOption]

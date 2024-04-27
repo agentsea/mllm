@@ -9,7 +9,7 @@ from litellm._logging import handler
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt
 
-from .models import EnvVarOptModel, LLMProviderOption
+from .models import EnvVarOptModel, MLLMModel, MLLMOption
 from .util import extract_parse_json
 from .prompt import Prompt
 
@@ -27,9 +27,9 @@ class ChatResponse(Generic[T], BaseModel):
     prompt_id: str
 
 
-class LLMProvider:
+class MLLM:
     """
-    A chat provider based on LiteLLM
+    A multimodal chat provider
     """
 
     provider_api_keys: Dict[str, str] = {
@@ -101,11 +101,11 @@ class LLMProvider:
         handler.setLevel(logging.ERROR)
 
     @classmethod
-    def all_opts(cls) -> List[LLMProviderOption]:
+    def all_opts(cls) -> List[MLLMOption]:
         out = []
         for model, key in cls.provider_api_keys.items():
             out.append(
-                LLMProviderOption(
+                MLLMOption(
                     model=model,
                     env_var=EnvVarOptModel(
                         name=key,
@@ -199,14 +199,14 @@ class LLMProvider:
         response = self.chat(thread)
         print("response from checking oai functionality: ", response)
 
-    def options(self) -> List[LLMProviderOption]:
+    def options(self) -> List[MLLMOption]:
         """Dynamically generates options based on the configured providers."""
         options = []
         for model_info in self.model_list:
             model_name = model_info["model_name"]
             api_key_env = self.provider_api_keys.get(model_name)
             if api_key_env:
-                option = LLMProviderOption(
+                option = MLLMOption(
                     model=model_name,
                     env_var=EnvVarOptModel(
                         name=api_key_env,
