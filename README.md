@@ -10,7 +10,7 @@ pip install mllm
 
 ## Usage
 
-Create an MLLM router from the API keys found in the current system env vars
+Create an MLLM router with a list of preferred models
 
 ```python
 import os
@@ -20,7 +20,9 @@ os.environ["OPENAI_API_KEY"] = "..."
 os.environ["ANTHROPIC_API_KEY"] = "..."
 os.environ["GEMINI_API_KEY"] = "..."
 
-router = MLLMRouter.from_env()
+router = MLLMRouter(
+    preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-pro-vision"]
+)
 ```
 
 Create a new role based chat thread

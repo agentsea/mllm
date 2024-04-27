@@ -40,7 +40,7 @@ class MLLMRouter:
 
     def __init__(
         self,
-        llm_providers: List[str],
+        preference: List[str],
         timeout: int = 30,
         allow_fails: int = 1,
         num_retries: int = 3,
@@ -48,13 +48,13 @@ class MLLMRouter:
         self.model_list = []
         fallbacks = []
 
-        if len(llm_providers) == 0:
+        if len(preference) == 0:
             raise Exception("No chat providers specified.")
 
-        self.model = llm_providers[0]
+        self.model = preference[0]
 
         # Construct the model list based on provided preferences and available API keys
-        for provider in llm_providers:
+        for provider in preference:
             api_key_env = self.provider_api_keys.get(provider)
             if api_key_env:
                 api_key = os.getenv(api_key_env)
