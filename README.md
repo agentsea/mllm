@@ -25,7 +25,6 @@ router = MLLMRouter(
 )
 ```
 
-a
 Create a new role based chat thread
 
 ```python
