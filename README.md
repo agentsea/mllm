@@ -30,7 +30,7 @@ Create a new role based chat thread
 ```python
 from mllm import RoleThread
 
-thread = RoleThread()
+thread = RoleThread(owner_id="dolores@agentsea.ai")
 thread.post(role="user", msg="Describe the image", images=["data:image/jpeg;base64,..."])
 ```
 
