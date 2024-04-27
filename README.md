@@ -69,7 +69,7 @@ RoleThread.find(id="123")
 Prompt.find(id="456)
 ```
 
-If you just need to store prompts
+To store a raw openai prompt
 
 ```python
 from mllm import Prompt, RoleThread
