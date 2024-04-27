@@ -10,25 +10,32 @@ pip install mllm
 
 ## Usage
 
-Create an MLLM provider from the API keys found in the current system env vars
+Create an MLLM router from the API keys found in the current system env vars
 
 ```python
-from mllm import MLLM, RoleThread
+import os
+from mllm import MLLMRouter
 
-mllm = MLLM.from_env()
+os.environ["OPENAI_API_KEY"] = "..."
+os.environ["ANTHROPIC_API_KEY"] = "..."
+os.environ["GEMINI_API_KEY"] = "..."
+
+router = MLLMRouter.from_env()
 ```
 
 Create a new role based chat thread
 
 ```python
+from mllm import RoleThread
+
 thread = RoleThread()
-thread.post(role="user", msg="How are you?")
+thread.post(role="user", msg="How are you?", images=["data:image/jpeg;base64,..."])
 ```
 
-Chat with the MLLM, store the prompt data in the namespace "foo"
+Chat with the MLLM, store the prompt data in the namespace `foo`
 
 ```python
-response = mllm.chat(thread, namespace="foo")
+response = router.chat(thread, namespace="foo")
 thread.add_msg(response.msg)
 ```
 
@@ -41,9 +48,13 @@ class Foo(BaseModel):
     bar: str
     baz: int
 
-thread.post(role="user", msg="Given the {...} can you return that in JSON?")
+thread.post(
+    role="user",
+    msg=f"What are bar and baz in this image? Please output as schema {Foo.model_json_schema()}"
+    images=["data:image/jpeg;base64,..."]
+)
 
-response = mllm.chat(thread, namespace="foo", response_schema=Foo)
+response = router.chat(thread, namespace="foo", response_schema=Foo)
 foo_parsed = response.parsed
 
 assert type(foo_parsed) == Foo

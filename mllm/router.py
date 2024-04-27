@@ -27,7 +27,7 @@ class ChatResponse(Generic[T], BaseModel):
     prompt_id: str
 
 
-class MLLM:
+class MLLMRouter:
     """
     A multimodal chat provider
     """
