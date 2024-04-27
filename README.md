@@ -56,7 +56,7 @@ thread.post(
     images=["data:image/jpeg;base64,..."]
 )
 
-response = router.chat(thread, namespace="animal", response_schema=Animal)
+response = router.chat(thread, namespace="animal", expect=Animal)
 animal_parsed = response.parsed
 
 assert type(animal_parsed) == Animal

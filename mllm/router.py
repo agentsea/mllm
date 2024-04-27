@@ -122,7 +122,7 @@ class MLLMRouter:
         thread: RoleThread,
         model: Optional[str] = None,
         namespace: str = "default",
-        response_schema: Optional[Type[T]] = None,
+        expect: Optional[Type[T]] = None,
         retries: int = 3,
     ) -> ChatResponse[T]:
         """Chat with a language model
@@ -131,7 +131,7 @@ class MLLMRouter:
             thread (RoleThread): A role thread
             model (Optional[str], optional): Model to use. Defaults to None.
             namespace (Optional[str], optional): Namespace to log into. Defaults to "default".
-            response_schema (Optional[Type[T]], optional): Schema to validate response against. Defaults to None.
+            expect (Optional[Type[T]], optional): Model type to expect response to conform to. Defaults to None.
             retries (int, optional): Number of retries if model fails. Defaults to 3.
 
         Returns:
@@ -145,7 +145,7 @@ class MLLMRouter:
             thread: RoleThread,
             model: str,
             namespace: str = "default",
-            response_schema: Optional[Type[T]] = None,
+            expect: Optional[Type[T]] = None,
         ) -> ChatResponse[T]:
             start = time.time()
             response = self.router.completion(model, thread.to_openai())
@@ -162,10 +162,10 @@ class MLLMRouter:
 
             response_obj = None
             msg = response["choices"][0]["message"].model_dump()
-            if response_schema:
+            if expect:
                 try:
                     # type: ignore
-                    response_obj = response_schema.model_validate(
+                    response_obj = expect.model_validate(
                         extract_parse_json(msg["text"])
                     )
                 except Exception as e:
@@ -187,7 +187,7 @@ class MLLMRouter:
 
             return out
 
-        return call_llm(thread, model, namespace, response_schema)
+        return call_llm(thread, model, namespace, expect)
 
     def check_model(self) -> None:
         """Check if the model is available"""
