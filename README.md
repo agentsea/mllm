@@ -48,7 +48,7 @@ from pydantic import BaseModel
 
 class Animal(BaseModel):
     species: str
-    color: int
+    color: str
 
 thread.post(
     role="user",
