@@ -25,13 +25,14 @@ router = MLLMRouter(
 )
 ```
 
+a
 Create a new role based chat thread
 
 ```python
 from mllm import RoleThread
 
 thread = RoleThread()
-thread.post(role="user", msg="How are you?", images=["data:image/jpeg;base64,..."])
+thread.post(role="user", msg="Describe the image", images=["data:image/jpeg;base64,..."])
 ```
 
 Chat with the MLLM, store the prompt data in the namespace `foo`
@@ -69,7 +70,7 @@ RoleThread.find(id="123")
 Prompt.find(id="456)
 ```
 
-Just store prompts
+If you just need to store prompts
 
 ```python
 from mllm import Prompt, RoleThread
