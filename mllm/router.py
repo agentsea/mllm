@@ -40,7 +40,7 @@ class MLLMRouter:
 
     def __init__(
         self,
-        preference: List[str],
+        preference: List[str] | str,
         timeout: int = 30,
         allow_fails: int = 1,
         num_retries: int = 3,
@@ -50,6 +50,9 @@ class MLLMRouter:
 
         if len(preference) == 0:
             raise Exception("No chat providers specified.")
+
+        if isinstance(preference, str):
+            preference = [preference]
 
         self.model = preference[0]
 
