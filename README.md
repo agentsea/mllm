@@ -46,20 +46,20 @@ Ask for a structured response
 ```python
 from pydantic import BaseModel
 
-class Foo(BaseModel):
-    bar: str
-    baz: int
+class Animal(BaseModel):
+    species: str
+    color: int
 
 thread.post(
     role="user",
-    msg=f"What are bar and baz in this image? Please output as schema {Foo.model_json_schema()}"
+    msg=f"What animal is in this image? Please output as schema {Animal.model_json_schema()}"
     images=["data:image/jpeg;base64,..."]
 )
 
-response = router.chat(thread, namespace="foo", response_schema=Foo)
-foo_parsed = response.parsed
+response = router.chat(thread, namespace="animal", response_schema=Animal)
+animal_parsed = response.parsed
 
-assert type(foo_parsed) == Foo
+assert type(animal_parsed) == Animal
 ```
 
 Find a saved thread or a prompt
