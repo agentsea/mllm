@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from threadmem.server.models import RoleThreadModel, RoleMessageModel
 
 
-class PromptModel(BaseModel):
+class V1PromptModel(BaseModel):
     """An LLM prompt model"""
 
     id: Optional[str] = None
@@ -17,7 +17,7 @@ class PromptModel(BaseModel):
     flagged: bool = False
 
 
-class EnvVarOptModel(BaseModel):
+class V1EnvVarOptModel(BaseModel):
     name: str
     description: Optional[str] = None
     required: bool = False
@@ -26,14 +26,14 @@ class EnvVarOptModel(BaseModel):
     options: List[str] = []
 
 
-class MLLMProviders(BaseModel):
+class V1MLLMProviders(BaseModel):
     preference: List[str] = []
 
 
-class MLLMOption(BaseModel):
+class V1MLLMOption(BaseModel):
     model: str
-    env_var: EnvVarOptModel
+    env_var: V1EnvVarOptModel
 
 
-class MLLMModel(BaseModel):
-    options: List[MLLMOption]
+class V1MLLMModel(BaseModel):
+    options: List[V1MLLMOption]

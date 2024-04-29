@@ -12,7 +12,7 @@ DB_TYPE = os.environ.get("DB_TYPE", "sqlite")
 def get_pg_conn() -> Engine:
     # Helper function to get environment variable with fallback
     def get_env_var(key: str) -> str:
-        task_key = f"PROMPT_{key}"
+        task_key = f"MLLM_{key}"
         value = os.environ.get(task_key)
         if value is None:
             value = os.environ.get(key)

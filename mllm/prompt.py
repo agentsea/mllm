@@ -9,7 +9,7 @@ from threadmem.server.models import RoleMessageModel, RoleThreadModel
 
 from .db.models import PromptRecord
 from .db.conn import WithDB
-from .models import PromptModel
+from .models import V1PromptModel
 
 logger = logging.getLogger(__name__)
 
@@ -144,8 +144,8 @@ class Prompt(WithDB):
 
         return obj
 
-    def to_schema(self) -> PromptModel:
-        return PromptModel(
+    def to_v1(self) -> V1PromptModel:
+        return V1PromptModel(
             id=self._id,
             namespace=self._namespace,
             thread=self._thread.to_schema(),
@@ -157,17 +157,17 @@ class Prompt(WithDB):
         )
 
     @classmethod
-    def from_schema(cls, schema: PromptModel) -> "Prompt":
+    def from_v1(cls, v1: V1PromptModel) -> "Prompt":
         obj = cls.__new__(cls)
 
-        obj._id = schema.id
-        obj._namespace = schema.namespace
-        obj._thread = RoleThread.from_schema(schema.thread)
-        obj._response = RoleMessage.from_schema(schema.response)
-        obj._metadata = schema.metadata
-        obj._created = schema.created
-        obj._approved = schema.approved
-        obj._flagged = schema.flagged
+        obj._id = v1.id
+        obj._namespace = v1.namespace
+        obj._thread = RoleThread.from_schema(v1.thread)
+        obj._response = RoleMessage.from_schema(v1.response)
+        obj._metadata = v1.metadata
+        obj._created = v1.created
+        obj._approved = v1.approved
+        obj._flagged = v1.flagged
 
         return obj
 

@@ -3,13 +3,13 @@ import logging
 from typing import Optional, List, Dict, TypeVar, Type, Generic
 import time
 
-from litellm import Router, ModelResponse
+from litellm import Router as LLMRouter, ModelResponse
 from threadmem import RoleThread, RoleMessage
 from litellm._logging import handler
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt
 
-from .models import EnvVarOptModel, MLLMModel, MLLMOption
+from .models import V1EnvVarOptModel, V1MLLMModel, V1MLLMOption
 from .util import extract_parse_json
 from .prompt import Prompt
 
@@ -27,7 +27,7 @@ class ChatResponse(Generic[T], BaseModel):
     prompt_id: str
 
 
-class MLLMRouter:
+class Router:
     """
     A multimodal chat provider
     """
@@ -87,7 +87,7 @@ class MLLMRouter:
                     }
                 )
 
-        self.router = Router(
+        self.router = LLMRouter(
             model_list=self.model_list,
             timeout=timeout,
             allowed_fails=allow_fails,
@@ -104,13 +104,13 @@ class MLLMRouter:
         handler.setLevel(logging.ERROR)
 
     @classmethod
-    def all_opts(cls) -> List[MLLMOption]:
+    def all_opts(cls) -> List[V1MLLMOption]:
         out = []
         for model, key in cls.provider_api_keys.items():
             out.append(
-                MLLMOption(
+                V1MLLMOption(
                     model=model,
-                    env_var=EnvVarOptModel(
+                    env_var=V1EnvVarOptModel(
                         name=key,
                         description=f"{model} API key",
                         required=True,
@@ -202,16 +202,16 @@ class MLLMRouter:
         response = self.chat(thread)
         print("response from checking oai functionality: ", response)
 
-    def options(self) -> List[MLLMOption]:
+    def options(self) -> List[V1MLLMOption]:
         """Dynamically generates options based on the configured providers."""
         options = []
         for model_info in self.model_list:
             model_name = model_info["model_name"]
             api_key_env = self.provider_api_keys.get(model_name)
             if api_key_env:
-                option = MLLMOption(
+                option = V1MLLMOption(
                     model=model_name,
-                    env_var=EnvVarOptModel(
+                    env_var=V1EnvVarOptModel(
                         name=api_key_env,
                         description=f"{model_name} API key",
                         required=True,

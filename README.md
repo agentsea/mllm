@@ -14,13 +14,13 @@ Create an MLLM router with a list of preferred models
 
 ```python
 import os
-from mllm import MLLMRouter
+from mllm import Router
 
 os.environ["OPENAI_API_KEY"] = "..."
 os.environ["ANTHROPIC_API_KEY"] = "..."
 os.environ["GEMINI_API_KEY"] = "..."
 
-router = MLLMRouter(
+router = Router(
     preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-pro-vision"]
 )
 ```
