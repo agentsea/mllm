@@ -9,7 +9,7 @@ from litellm._logging import handler
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt
 
-from .models import V1EnvVarOptModel, V1MLLMModel, V1MLLMOption
+from .models import V1EnvVarOpt, V1MLLMOption
 from .util import extract_parse_json
 from .prompt import Prompt
 
@@ -110,7 +110,7 @@ class Router:
             out.append(
                 V1MLLMOption(
                     model=model,
-                    env_var=V1EnvVarOptModel(
+                    env_var=V1EnvVarOpt(
                         name=key,
                         description=f"{model} API key",
                         required=True,
@@ -211,7 +211,7 @@ class Router:
             if api_key_env:
                 option = V1MLLMOption(
                     model=model_name,
-                    env_var=V1EnvVarOptModel(
+                    env_var=V1EnvVarOpt(
                         name=api_key_env,
                         description=f"{model_name} API key",
                         required=True,

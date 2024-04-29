@@ -9,7 +9,7 @@ from threadmem.server.models import RoleMessageModel, RoleThreadModel
 
 from .db.models import PromptRecord
 from .db.conn import WithDB
-from .models import V1PromptModel
+from .models import V1Prompt
 
 logger = logging.getLogger(__name__)
 
@@ -144,8 +144,8 @@ class Prompt(WithDB):
 
         return obj
 
-    def to_v1(self) -> V1PromptModel:
-        return V1PromptModel(
+    def to_v1(self) -> V1Prompt:
+        return V1Prompt(
             id=self._id,
             namespace=self._namespace,
             thread=self._thread.to_schema(),
@@ -157,7 +157,7 @@ class Prompt(WithDB):
         )
 
     @classmethod
-    def from_v1(cls, v1: V1PromptModel) -> "Prompt":
+    def from_v1(cls, v1: V1Prompt) -> "Prompt":
         obj = cls.__new__(cls)
 
         obj._id = v1.id
