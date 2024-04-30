@@ -17,7 +17,7 @@ from .prompt import Prompt
 T = TypeVar("T", bound=BaseModel)
 
 
-class ChatResponse(Generic[T], BaseModel):
+class ChatResponse(BaseModel, Generic[T]):
     model: str
     msg: RoleMessage
     parsed: Optional[T] = None
