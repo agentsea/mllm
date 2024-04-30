@@ -1,15 +1,15 @@
 from typing import Optional, Dict, Any, List
 
 from pydantic import BaseModel
-from threadmem.server.models import RoleThreadModel, RoleMessageModel
+from threadmem.server.models import V1RoleThread, V1RoleMessage
 
 
 class V1Prompt(BaseModel):
     """An LLM prompt model"""
 
     id: Optional[str] = None
-    thread: RoleThreadModel
-    response: RoleMessageModel
+    thread: V1RoleThread
+    response: V1RoleMessage
     namespace: str = "default"
     metadata: Dict[str, Any] = {}
     created: Optional[float] = None

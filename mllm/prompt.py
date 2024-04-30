@@ -5,7 +5,7 @@ import json
 from typing import Dict, Any, List, Optional
 
 from threadmem import RoleThread, RoleMessage
-from threadmem.server.models import RoleMessageModel, RoleThreadModel
+from threadmem.server.models import V1RoleMessage, V1RoleThread
 
 from .db.models import PromptRecord
 from .db.conn import WithDB
@@ -115,8 +115,8 @@ class Prompt(WithDB):
         return PromptRecord(
             id=self._id,
             namespace=self._namespace,
-            thread=self._thread.to_schema().model_dump_json(),
-            response=self._response.to_schema().model_dump_json(),
+            thread=self._thread.to_v1().model_dump_json(),
+            response=self._response.to_v1().model_dump_json(),
             metadata_=json.dumps(self._metadata),
             created=self._created,
             approved=self._approved,
@@ -126,10 +126,10 @@ class Prompt(WithDB):
     @classmethod
     def from_record(cls, record: PromptRecord) -> "Prompt":
         # Deserialize thread_id into a RoleThreadModel using a suitable method or lookup
-        thread_model = RoleThreadModel.model_validate_json(str(record.thread))
-        thread = RoleThread.from_schema(thread_model)
+        thread_model = V1RoleThread.model_validate_json(str(record.thread))
+        thread = RoleThread.from_v1(thread_model)
 
-        response = RoleMessageModel.model_validate_json(str(record.response))
+        response = V1RoleMessage.model_validate_json(str(record.response))
         metadata = json.loads(record.metadata_) if record.metadata_ else {}  # type: ignore
 
         obj = cls.__new__(cls)
@@ -148,8 +148,8 @@ class Prompt(WithDB):
         return V1Prompt(
             id=self._id,
             namespace=self._namespace,
-            thread=self._thread.to_schema(),
-            response=self._response.to_schema(),
+            thread=self._thread.to_v1(),
+            response=self._response.to_v1(),
             metadata=self._metadata,
             created=self._created,
             approved=self._approved,
@@ -162,8 +162,8 @@ class Prompt(WithDB):
 
         obj._id = v1.id
         obj._namespace = v1.namespace
-        obj._thread = RoleThread.from_schema(v1.thread)
-        obj._response = RoleMessage.from_schema(v1.response)
+        obj._thread = RoleThread.from_v1(v1.thread)
+        obj._response = RoleMessage.from_v1(v1.response)
         obj._metadata = v1.metadata
         obj._created = v1.created
         obj._approved = v1.approved
