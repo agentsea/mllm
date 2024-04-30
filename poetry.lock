@@ -1577,13 +1577,13 @@ doc = ["reno", "sphinx", "tornado (>=4.5)"]
 
 [[package]]
 name = "threadmem"
-version = "0.2.24"
+version = "0.2.25"
 description = "Thread memory for AI agents"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "threadmem-0.2.24-py3-none-any.whl", hash = "sha256:3998ddabc4146f2f8ba385dc0bf0714f4f3aae84f3a8265f0a2865568dc7de15"},
-    {file = "threadmem-0.2.24.tar.gz", hash = "sha256:e1464f1006b8ddfd62320a0631750a5b9f3f66645886c847006a07263924b5ae"},
+    {file = "threadmem-0.2.25-py3-none-any.whl", hash = "sha256:0a0ba1fceb7afd858cb8932a8d7bdc761a35a8bad30336fb4d4b32fc07425e3d"},
+    {file = "threadmem-0.2.25.tar.gz", hash = "sha256:04599d2f2089c67b2e232a5c275bf180b5e7b2fb2662a2c30d950fc44e4896b8"},
 ]
 
 [package.dependencies]
@@ -2242,4 +2242,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "0557928676db876efc22dd8f72bf14990d1cb5822aa881ccd145bd9112d60ac6"
+content-hash = "a22ccfe901ea7d4167aeefc4e926bd263e79dd5a0980d1308762948106e0decb"

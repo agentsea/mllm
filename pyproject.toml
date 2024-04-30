@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mllm"
-version = "0.1.6"
+version = "0.1.7"
 description = "Multimodal Large Language Models"
 authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
 license = "Apache 2.0"
@@ -8,9 +8,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-threadmem = "^0.2.24"
 litellm = "^1.35.29"
 tenacity = "^8.2.3"
+threadmem = "^0.2.25"
 
 
 [build-system]
