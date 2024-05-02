@@ -1,6 +1,26 @@
-# MLLM
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <!-- <a href="https://github.com/agentsea/skillpacks">
+    <img src="https://project-logo.png" alt="Logo" width="80">
+  </a> -->
 
-MultiModal Large Language Models
+  <h1 align="center">MLLM</h1>
+
+  <p align="center">
+    Multimodal Large Language Models
+    <br />
+    <a href="https://github.com/agentsea/mllm"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/agentsea/mllm">View Demo</a>
+    ·
+    <a href="https://github.com/agentsea/mllm/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/agentsea/mllm/issues">Request Feature</a>
+  </p>
+  <br>
+</p>
 
 ## Installation
 
