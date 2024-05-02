@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Optional, List, Dict, TypeVar, Type, Generic
 import time
+import logging
 
 from litellm import Router as LLMRouter, ModelResponse
 from threadmem import RoleThread, RoleMessage
@@ -13,6 +14,7 @@ from .models import V1EnvVarOpt, V1MLLMOption
 from .util import extract_parse_json
 from .prompt import Prompt
 
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -160,7 +162,7 @@ class Router:
 
             elapsed = end - start
 
-            print("llm response: ", response.__dict__)
+            logger.debug("llm response: ", response.__dict__)
             logging.debug("response: ", response)
 
             response_obj = None
@@ -172,10 +174,10 @@ class Router:
                         extract_parse_json(msg["text"])
                     )
                 except Exception as e:
-                    print("Validation error: ", e)
+                    logger.error("Validation error: ", e)
                     raise
 
-            resp_msg = RoleMessage(role=msg["role"], text=msg["text"])
+            resp_msg = RoleMessage(role=msg["role"], text=msg["content"])
 
             prompt = Prompt(thread, resp_msg, namespace=namespace)
             out = ChatResponse(
@@ -200,7 +202,7 @@ class Router:
             "user", "Just checking if you are working... please return 'yes' if you are"
         )
         response = self.chat(thread)
-        print("response from checking oai functionality: ", response)
+        logger.debug("response from checking oai functionality: ", response)
 
     def options(self) -> List[V1MLLMOption]:
         """Dynamically generates options based on the configured providers."""
@@ -235,7 +237,7 @@ class Router:
         if not preference:
             preference = cls.provider_api_keys.keys()
 
-        print("\nloading models with preference: ", preference)
+        logger.info("loading models with preference: ", preference)
         for provider in preference:
             env_var = cls.provider_api_keys.get(provider)
             if not env_var:
@@ -243,8 +245,8 @@ class Router:
                     f"Invalid provider '{provider}' specified in MODEL_PREFERENCE."
                 )
             if os.getenv(env_var):
-                print(
-                    f"\nFound LLM provider '{provider}' API key in environment variables."
+                logger.info(
+                    f"Found LLM provider '{provider}' API key in environment variables."
                 )
                 available_providers.append(provider)
 
