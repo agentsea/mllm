@@ -15,6 +15,7 @@ from .util import extract_parse_json
 from .prompt import Prompt
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -162,22 +163,19 @@ class Router:
 
             elapsed = end - start
 
-            logger.debug("llm response: ", response.__dict__)
-            logging.debug("response: ", response)
+            logger.debug(f"llm response: {response.__dict__}")
 
             response_obj = None
             msg = response["choices"][0]["message"].model_dump()
+            content = msg["content"]
             if expect:
                 try:
-                    # type: ignore
-                    response_obj = expect.model_validate(
-                        extract_parse_json(msg["text"])
-                    )
+                    response_obj = expect.model_validate(extract_parse_json(content))
                 except Exception as e:
-                    logger.error("Validation error: ", e)
+                    logger.error(f"Validation error: {e} for '{content}")
                     raise
 
-            resp_msg = RoleMessage(role=msg["role"], text=msg["content"])
+            resp_msg = RoleMessage(role=msg["role"], text=content)
 
             prompt = Prompt(thread, resp_msg, namespace=namespace)
             out = ChatResponse(
@@ -202,7 +200,7 @@ class Router:
             "user", "Just checking if you are working... please return 'yes' if you are"
         )
         response = self.chat(thread)
-        logger.debug("response from checking oai functionality: ", response)
+        logger.debug(f"response from checking oai functionality: {response}")
 
     def options(self) -> List[V1MLLMOption]:
         """Dynamically generates options based on the configured providers."""
@@ -237,7 +235,7 @@ class Router:
         if not preference:
             preference = cls.provider_api_keys.keys()
 
-        logger.info("loading models with preference: ", preference)
+        logger.info(f"loading models with preference: {preference}")
         for provider in preference:
             env_var = cls.provider_api_keys.get(provider)
             if not env_var:
