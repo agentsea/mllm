@@ -56,3 +56,5 @@ def test_router():
     prompt = prompts[0]
     assert prompt.response == response.msg
     assert prompt.response_schema is None
+
+    prompt.to_v1()
