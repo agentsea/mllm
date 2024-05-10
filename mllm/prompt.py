@@ -4,7 +4,7 @@ import logging
 import json
 from typing import Dict, Any, List, Optional, Type
 
-from openai import BaseModel
+from pydantic import BaseModel
 from threadmem import RoleThread, RoleMessage
 from threadmem.server.models import V1RoleMessage, V1RoleThread
 
