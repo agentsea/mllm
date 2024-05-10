@@ -1,14 +1,15 @@
 import os
 import logging
-from typing import Optional, List, Dict, TypeVar, Type, Generic, Callable
+from typing import Optional, List, Dict, TypeVar, Type, Generic
 import time
 import logging
+from dataclasses import dataclass
 
 from litellm import Router as LLMRouter, ModelResponse
 from threadmem import RoleThread, RoleMessage
 from litellm._logging import handler
 from pydantic import BaseModel
-from tenacity import retry, stop_after_attempt, RetryCallState, before_sleep_log
+from tenacity import retry, stop_after_attempt, before_sleep_log
 
 from .models import V1EnvVarOpt, V1MLLMOption
 from .util import extract_parse_json
@@ -20,14 +21,15 @@ logger.setLevel(logging.INFO)
 T = TypeVar("T", bound=BaseModel)
 
 
-class ChatResponse(BaseModel, Generic[T]):
+@dataclass
+class ChatResponse(Generic[T]):
     model: str
     msg: RoleMessage
-    parsed: Optional[T] = None
     time_elapsed: float
     tokens_request: int
     tokens_response: int
-    prompt_id: str
+    prompt: Prompt
+    parsed: Optional[T] = None
 
 
 class Router:
@@ -184,12 +186,10 @@ class Router:
 
             resp_msg = RoleMessage(role=msg["role"], text=content)
 
-            # ModelResponse(id='chatcmpl-9KciTnklcnUK4idGeBNRWBTnoerUy', choices=[Choices(finish_reason='stop', index=0, message=Message(content="This image features a beautiful natural landscape with a wooden boardwalk extending through a lush green meadow. The boardwalk disappears into the horizon, suggesting a pathway for walking and exploring the area. There's a variety of greenery, likely various types of grasses or low shrubs. The sky is blue with some soft clouds, indicating fair weather. The overall scene evokes a sense of tranquility and the beauty of the natural environment.", role='assistant'))], created=1714702413, model='gpt-4-1106-vision-preview', object='chat.completion', system_fingerprint=None, usage=Usage(completion_tokens=88, prompt_tokens=1118, total_tokens=1206))
-
             prompt = Prompt(
                 thread=thread,
                 response=resp_msg,
-                response_schema=expect,
+                response_schema=expect,  # type: ignore
                 namespace=namespace,
                 agent_id=agent_id,
                 owner_id=owner_id,
@@ -203,7 +203,7 @@ class Router:
                 time_elapsed=elapsed,
                 tokens_request=response.usage.prompt_tokens,  # type: ignore
                 tokens_response=response.usage.completion_tokens,  # type: ignore
-                prompt_id=prompt.id,
+                prompt=prompt,
             )
 
             return out

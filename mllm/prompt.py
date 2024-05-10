@@ -2,9 +2,9 @@ import uuid
 import time
 import logging
 import json
-from typing import Dict, Any, List, Optional, Type
+from typing import Dict, Any, List, Optional
 
-from pydantic import create_model, Field, ValidationError, BaseModel
+from openai import BaseModel
 from threadmem import RoleThread, RoleMessage
 from threadmem.server.models import V1RoleMessage, V1RoleThread
 
@@ -22,7 +22,7 @@ class Prompt(WithDB):
         self,
         thread: RoleThread,
         response: RoleMessage,
-        response_schema: Optional[Type[BaseModel]] = None,
+        response_schema: Optional[BaseModel] = None,
         namespace: str = "default",
         metadata: Dict[str, Any] = {},
         approved: bool = False,
@@ -35,7 +35,9 @@ class Prompt(WithDB):
         self._namespace = namespace
         self._thread = thread
         self._response = response
-        self._response_schema = response_schema
+        self._response_schema = (
+            response_schema.model_json_schema() if response_schema else None
+        )
         self._metadata = metadata
         self._created = time.time()
         self._approved = approved
@@ -75,11 +77,11 @@ class Prompt(WithDB):
         self._response = value
 
     @property
-    def response_schema(self) -> Optional[Type[BaseModel]]:
+    def response_schema(self) -> Optional[Dict[str, Any]]:
         return self._response_schema
 
     @response_schema.setter
-    def response_schema(self, value: Optional[Type[BaseModel]]):
+    def response_schema(self, value: Optional[Dict[str, Any]]):
         self._response_schema = value
 
     @property
@@ -149,9 +151,7 @@ class Prompt(WithDB):
             thread=self._thread.to_v1().model_dump_json(),
             response=self._response.to_v1().model_dump_json(),
             response_schema=(
-                json.dumps(self._response_schema.model_json_schema())
-                if self._response_schema
-                else None
+                json.dumps(self._response_schema) if self._response_schema else None
             ),
             metadata_=json.dumps(self._metadata),
             created=self._created,
@@ -171,11 +171,9 @@ class Prompt(WithDB):
         response_model = V1RoleMessage.model_validate_json(str(record.response))
         response = RoleMessage.from_v1(response_model)
 
-        # Dynamically create Pydantic model from JSON schema if available
-        response_schema_model = None
+        schema = None
         if record.response_schema:  # type: ignore
             schema = json.loads(record.response_schema)  # type: ignore
-            response_schema_model = cls._schema_to_model(schema)
 
         # Load metadata
         metadata = json.loads(record.metadata_) if record.metadata_ else {}  # type: ignore
@@ -185,9 +183,7 @@ class Prompt(WithDB):
         obj._namespace = record.namespace
         obj._thread = thread
         obj._response = response
-        obj._response_schema = (
-            response_schema_model  # Assign the dynamically created model
-        )
+        obj._response_schema = schema
         obj._metadata = metadata
         obj._created = record.created
         obj._approved = record.approved
@@ -203,11 +199,7 @@ class Prompt(WithDB):
             namespace=self._namespace,
             thread=self._thread.to_v1(),
             response=self._response.to_v1(),
-            response_schema=(
-                self._response_schema.model_json_schema()
-                if self._response_schema
-                else None
-            ),
+            response_schema=self.response_schema,
             metadata=self._metadata,
             created=self._created,
             approved=self._approved,
@@ -220,15 +212,11 @@ class Prompt(WithDB):
     def from_v1(cls, v1: V1Prompt) -> "Prompt":
         obj = cls.__new__(cls)
 
-        response_schema_model = None
-        if v1.response_schema:
-            response_schema_model = cls._schema_to_model(v1.response_schema)
-
         obj._id = v1.id
         obj._namespace = v1.namespace
         obj._thread = RoleThread.from_v1(v1.thread)
         obj._response = RoleMessage.from_v1(v1.response)
-        obj._response_schema = response_schema_model
+        obj._response_schema = v1.response_schema
         obj._metadata = v1.metadata
         obj._created = v1.created
         obj._approved = v1.approved
@@ -237,23 +225,6 @@ class Prompt(WithDB):
         obj._model = v1.model
 
         return obj
-
-    @staticmethod
-    def _schema_to_model(schema: Dict[str, Any]) -> Type[BaseModel]:
-        model_name = schema.get("title", "DynamicResponseSchema")
-        fields = {}
-        for name, spec in schema.get("properties", {}).items():
-            pydantic_type = {
-                "string": str,
-                "integer": int,
-                "boolean": bool,
-                "number": float,
-            }.get(spec["type"], str)
-            default = ... if name in schema.get("required", []) else None
-            fields[name] = (pydantic_type, Field(default, **spec))
-
-        response_schema_model = create_model(model_name, **fields)
-        return response_schema_model
 
     @classmethod
     def find(cls, **kwargs) -> List["Prompt"]:
