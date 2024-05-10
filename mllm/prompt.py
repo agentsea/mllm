@@ -2,7 +2,7 @@ import uuid
 import time
 import logging
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Type
 
 from openai import BaseModel
 from threadmem import RoleThread, RoleMessage
@@ -22,7 +22,7 @@ class Prompt(WithDB):
         self,
         thread: RoleThread,
         response: RoleMessage,
-        response_schema: Optional[BaseModel] = None,
+        response_schema: Optional[Type[BaseModel]] = None,
         namespace: str = "default",
         metadata: Dict[str, Any] = {},
         approved: bool = False,
