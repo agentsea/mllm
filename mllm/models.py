@@ -10,7 +10,7 @@ class V1Prompt(BaseModel):
     id: Optional[str] = None
     thread: V1RoleThread
     response: V1RoleMessage
-    response_schema: Optional[Type[BaseModel]] = None
+    response_schema: Optional[Dict[str, Any]] = None
     namespace: str = "default"
     metadata: Dict[str, Any] = {}
     created: Optional[float] = None
