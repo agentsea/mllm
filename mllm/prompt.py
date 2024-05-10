@@ -4,7 +4,7 @@ import logging
 import json
 from typing import Dict, Any, List, Optional, Type
 
-from pydantic import BaseModel
+from pydantic import create_model, Field, ValidationError, BaseModel
 from threadmem import RoleThread, RoleMessage
 from threadmem.server.models import V1RoleMessage, V1RoleThread
 
@@ -149,7 +149,7 @@ class Prompt(WithDB):
             thread=self._thread.to_v1().model_dump_json(),
             response=self._response.to_v1().model_dump_json(),
             response_schema=(
-                self._response_schema.model_json_schema()
+                json.dumps(self._response_schema.model_json_schema())
                 if self._response_schema
                 else None
             ),
@@ -167,7 +167,30 @@ class Prompt(WithDB):
         thread_model = V1RoleThread.model_validate_json(str(record.thread))
         thread = RoleThread.from_v1(thread_model)
 
-        response = V1RoleMessage.model_validate_json(str(record.response))
+        # Deserialize the response
+        response_model = V1RoleMessage.model_validate_json(str(record.response))
+        response = RoleMessage.from_v1(response_model)
+
+        # Dynamically create Pydantic model from JSON schema if available
+        response_schema_model = None
+        if record.response_schema:  # type: ignore
+            schema = json.loads(record.response_schema)  # type: ignore
+            # Use the title from the JSON schema as the model name, defaulting to 'DynamicResponseSchema' if not present
+            model_name = schema.get("title", "DynamicResponseSchema")
+            fields = {}
+            for name, spec in schema.get("properties", {}).items():
+                pydantic_type = {
+                    "string": str,
+                    "integer": int,
+                    "boolean": bool,
+                    "number": float,
+                }.get(spec["type"], str)
+                default = ... if name in schema.get("required", []) else None
+                fields[name] = (pydantic_type, Field(default, **spec))
+
+            response_schema_model = create_model(model_name, **fields)
+
+        # Load metadata
         metadata = json.loads(record.metadata_) if record.metadata_ else {}  # type: ignore
 
         obj = cls.__new__(cls)
@@ -176,7 +199,7 @@ class Prompt(WithDB):
         obj._thread = thread
         obj._response = response
         obj._response_schema = (
-            V1RoleMessage.model_json_schema() if record.response_schema else None  # type: ignore
+            response_schema_model  # Assign the dynamically created model
         )
         obj._metadata = metadata
         obj._created = record.created

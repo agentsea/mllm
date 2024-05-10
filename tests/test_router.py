@@ -1,4 +1,4 @@
-from mllm import Router
+from mllm import Router, Prompt
 from threadmem import RoleThread
 from pydantic import BaseModel
 
@@ -26,4 +26,13 @@ def test_router():
 
     response = router.chat(thread, expect=Animal)
 
+    assert type(response.parsed) == Animal
     print("\n\n!response: ", response)
+
+    prompts = Prompt.find(id=response.prompt_id)
+    assert len(prompts) == 1
+
+    prompt = prompts[0]
+    assert prompt.response == response.msg
+    assert prompt.response_schema is not None
+    assert prompt.response_schema.model_json_schema() == Animal.model_json_schema()

@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Optional, List, Dict, TypeVar, Type, Generic
+from typing import Optional, List, Dict, TypeVar, Type, Generic, Callable
 import time
 import logging
 
@@ -8,7 +8,7 @@ from litellm import Router as LLMRouter, ModelResponse
 from threadmem import RoleThread, RoleMessage
 from litellm._logging import handler
 from pydantic import BaseModel
-from tenacity import retry, stop_after_attempt
+from tenacity import retry, stop_after_attempt, RetryCallState, before_sleep_log
 
 from .models import V1EnvVarOpt, V1MLLMOption
 from .util import extract_parse_json
@@ -130,6 +130,8 @@ class Router:
         namespace: str = "default",
         expect: Optional[Type[T]] = None,
         retries: int = 3,
+        agent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
     ) -> ChatResponse[T]:
         """Chat with a language model
 
@@ -139,6 +141,8 @@ class Router:
             namespace (Optional[str], optional): Namespace to log into. Defaults to "default".
             expect (Optional[Type[T]], optional): Model type to expect response to conform to. Defaults to None.
             retries (int, optional): Number of retries if model fails. Defaults to 3.
+            agent_id (Optional[str], optional): Agent ID for logging. Defaults to None.
+            owner_id (Optional[str], optional): Owner ID for logging. Defaults to None.
 
         Returns:
             ChatResponse: A chat response
@@ -146,7 +150,10 @@ class Router:
         if not model:
             model = self.model
 
-        @retry(stop=stop_after_attempt(retries))
+        @retry(
+            stop=stop_after_attempt(retries),
+            before_sleep=before_sleep_log(logger, logging.ERROR),
+        )
         def call_llm(
             thread: RoleThread,
             model: str,
@@ -177,14 +184,25 @@ class Router:
 
             resp_msg = RoleMessage(role=msg["role"], text=content)
 
-            prompt = Prompt(thread, resp_msg, namespace=namespace)
+            # ModelResponse(id='chatcmpl-9KciTnklcnUK4idGeBNRWBTnoerUy', choices=[Choices(finish_reason='stop', index=0, message=Message(content="This image features a beautiful natural landscape with a wooden boardwalk extending through a lush green meadow. The boardwalk disappears into the horizon, suggesting a pathway for walking and exploring the area. There's a variety of greenery, likely various types of grasses or low shrubs. The sky is blue with some soft clouds, indicating fair weather. The overall scene evokes a sense of tranquility and the beauty of the natural environment.", role='assistant'))], created=1714702413, model='gpt-4-1106-vision-preview', object='chat.completion', system_fingerprint=None, usage=Usage(completion_tokens=88, prompt_tokens=1118, total_tokens=1206))
+
+            prompt = Prompt(
+                thread=thread,
+                response=resp_msg,
+                response_schema=expect,
+                namespace=namespace,
+                agent_id=agent_id,
+                owner_id=owner_id,
+                model=response.model or model,
+            )
+
             out = ChatResponse(
                 model=response.model or model,
                 msg=resp_msg,
                 parsed=response_obj,
                 time_elapsed=elapsed,
-                tokens_request=0,  # TODO
-                tokens_response=0,
+                tokens_request=response.usage.prompt_tokens,  # type: ignore
+                tokens_response=response.usage.completion_tokens,  # type: ignore
                 prompt_id=prompt.id,
             )
 
