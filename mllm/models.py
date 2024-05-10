@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Type
 
 from pydantic import BaseModel
 from threadmem.server.models import V1RoleThread, V1RoleMessage
@@ -10,11 +10,14 @@ class V1Prompt(BaseModel):
     id: Optional[str] = None
     thread: V1RoleThread
     response: V1RoleMessage
+    response_schema: Optional[Type[BaseModel]] = None
     namespace: str = "default"
     metadata: Dict[str, Any] = {}
     created: Optional[float] = None
     approved: bool = False
     flagged: bool = False
+    agent_id: Optional[str] = None
+    model: Optional[str] = None
 
 
 class V1EnvVarOpt(BaseModel):

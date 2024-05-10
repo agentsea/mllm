@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mllm"
-version = "0.1.14"
+version = "0.1.18"
 description = "Multimodal Large Language Models"
 authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
 license = "Apache 2.0"

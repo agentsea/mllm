@@ -2,8 +2,9 @@ import uuid
 import time
 import logging
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Type
 
+from pydantic import BaseModel
 from threadmem import RoleThread, RoleMessage
 from threadmem.server.models import V1RoleMessage, V1RoleThread
 
@@ -21,21 +22,27 @@ class Prompt(WithDB):
         self,
         thread: RoleThread,
         response: RoleMessage,
+        response_schema: Optional[Type[BaseModel]] = None,
         namespace: str = "default",
         metadata: Dict[str, Any] = {},
         approved: bool = False,
         flagged: bool = False,
         owner_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
+        model: Optional[str] = None,
     ):
         self._id = str(uuid.uuid4())
         self._namespace = namespace
         self._thread = thread
         self._response = response
+        self._response_schema = response_schema
         self._metadata = metadata
         self._created = time.time()
         self._approved = approved
         self._flagged = flagged
         self._owner_id = owner_id
+        self._agent_id = agent_id
+        self._model = model
 
         self.save()
 
@@ -66,6 +73,14 @@ class Prompt(WithDB):
     @response.setter
     def response(self, value: RoleMessage):
         self._response = value
+
+    @property
+    def response_schema(self) -> Optional[Type[BaseModel]]:
+        return self._response_schema
+
+    @response_schema.setter
+    def response_schema(self, value: Optional[Type[BaseModel]]):
+        self._response_schema = value
 
     @property
     def metadata(self) -> Dict[str, Any]:
@@ -107,6 +122,22 @@ class Prompt(WithDB):
     def owner_id(self, value: str):
         self._owner_id = value
 
+    @property
+    def agent_id(self) -> Optional[str]:
+        return self._agent_id
+
+    @agent_id.setter
+    def agent_id(self, value: str):
+        self._agent_id = value
+
+    @property
+    def model(self) -> Optional[str]:
+        return self._model
+
+    @model.setter
+    def model(self, value: str):
+        self._model = value
+
     def to_record(self) -> PromptRecord:
         # Serialize the response using RoleMessageModel's json() method
         if not self.metadata:
@@ -117,10 +148,17 @@ class Prompt(WithDB):
             namespace=self._namespace,
             thread=self._thread.to_v1().model_dump_json(),
             response=self._response.to_v1().model_dump_json(),
+            response_schema=(
+                self._response_schema.model_json_schema()
+                if self._response_schema
+                else None
+            ),
             metadata_=json.dumps(self._metadata),
             created=self._created,
             approved=self._approved,
             flagged=self._flagged,
+            agent_id=self._agent_id,
+            model=self._model,
         )
 
     @classmethod
@@ -137,10 +175,15 @@ class Prompt(WithDB):
         obj._namespace = record.namespace
         obj._thread = thread
         obj._response = response
+        obj._response_schema = (
+            V1RoleMessage.model_json_schema() if record.response_schema else None  # type: ignore
+        )
         obj._metadata = metadata
         obj._created = record.created
         obj._approved = record.approved
         obj._flagged = record.flagged
+        obj._agent_id = record.agent_id
+        obj._model = record.model
 
         return obj
 
@@ -150,10 +193,13 @@ class Prompt(WithDB):
             namespace=self._namespace,
             thread=self._thread.to_v1(),
             response=self._response.to_v1(),
+            response_schema=self._response_schema,
             metadata=self._metadata,
             created=self._created,
             approved=self._approved,
             flagged=self._flagged,
+            agent_id=self._agent_id,
+            model=self._model,
         )
 
     @classmethod
@@ -164,10 +210,13 @@ class Prompt(WithDB):
         obj._namespace = v1.namespace
         obj._thread = RoleThread.from_v1(v1.thread)
         obj._response = RoleMessage.from_v1(v1.response)
+        obj._response_schema = v1.response_schema
         obj._metadata = v1.metadata
         obj._created = v1.created
         obj._approved = v1.approved
         obj._flagged = v1.flagged
+        obj._agent_id = v1.agent_id
+        obj._model = v1.model
 
         return obj
 
