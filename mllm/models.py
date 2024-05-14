@@ -18,6 +18,7 @@ class V1Prompt(BaseModel):
     flagged: bool = False
     agent_id: Optional[str] = None
     model: Optional[str] = None
+    owner_id: Optional[str] = None
 
 
 class V1EnvVarOpt(BaseModel):

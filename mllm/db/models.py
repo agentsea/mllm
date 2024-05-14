@@ -20,3 +20,4 @@ class PromptRecord(Base):
     agent_id = Column(String, nullable=True)
     model = Column(String, nullable=True)
     created = Column(Float, default=time.time)
+    owner_id = Column(String, nullable=True)

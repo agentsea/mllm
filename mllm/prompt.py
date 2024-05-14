@@ -159,6 +159,7 @@ class Prompt(WithDB):
             flagged=self._flagged,
             agent_id=self._agent_id,
             model=self._model,
+            owner_id=self._owner_id,
         )
 
     @classmethod
@@ -190,6 +191,7 @@ class Prompt(WithDB):
         obj._flagged = record.flagged
         obj._agent_id = record.agent_id
         obj._model = record.model
+        obj._owner_id = record.owner_id
 
         return obj
 
@@ -206,6 +208,7 @@ class Prompt(WithDB):
             flagged=self._flagged,
             agent_id=self._agent_id,
             model=self._model,
+            owner_id=self._owner_id,
         )
 
     @classmethod
@@ -223,6 +226,7 @@ class Prompt(WithDB):
         obj._flagged = v1.flagged
         obj._agent_id = v1.agent_id
         obj._model = v1.model
+        obj._owner_id = v1.owner_id
 
         return obj
 
