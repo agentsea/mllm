@@ -38,6 +38,7 @@ class Router:
     """
 
     provider_api_keys: Dict[str, str] = {
+        "gpt-4o": "OPENAI_API_KEY",
         "gpt-4-turbo": "OPENAI_API_KEY",
         "anthropic/claude-3-opus-20240229": "ANTHROPIC_API_KEY",
         "gemini/gemini-pro-vision": "GEMINI_API_KEY",
