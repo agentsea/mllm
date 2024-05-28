@@ -1,15 +1,15 @@
-import uuid
-import time
-import logging
 import json
-from typing import Dict, Any, List, Optional, Type
+import logging
+import time
+import uuid
+from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
-from threadmem import RoleThread, RoleMessage
+from threadmem import RoleMessage, RoleThread
 from threadmem.server.models import V1RoleMessage, V1RoleThread
 
-from .db.models import PromptRecord
 from .db.conn import WithDB
+from .db.models import PromptRecord
 from .models import V1Prompt
 
 logger = logging.getLogger(__name__)
@@ -243,7 +243,7 @@ class Prompt(WithDB):
         raise ValueError("No session")
 
     def save(self) -> None:
-        logger.debug("saving prompt", self._id)
+        logger.debug(f"saving prompt: {self._id}")
         for db in self.get_db():
             db.merge(self.to_record())
             db.commit()
