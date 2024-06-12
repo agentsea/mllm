@@ -120,11 +120,12 @@ saved_prompt = Prompt(thread, response_msg, namespace="foo")
 
 ## Integrations
 
-MLLM is integrated into:
+MLLM is integrated with:
 
 - [Taskara](https://github.com/agentsea/taskara) A task management library for AI agents
 - [Skillpacks](https://github.com/agentsea/skillpacks) A library to fine tune AI agents on tasks.
 - [Surfkit](https://github.com/agentsea/surfkit) A platform for AI agents
+- [Threadmem](https://github.com/agentsea/threadmem) A thread management library for AI agents
 
 ## Community
 
