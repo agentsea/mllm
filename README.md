@@ -118,6 +118,14 @@ response_msg = RoleMessage.from_openai(response["choices"][0]["message"])
 saved_prompt = Prompt(thread, response_msg, namespace="foo")
 ```
 
+## Integrations
+
+MLLM is integrated into:
+
+- [Taskara](https://github.com/agentsea/taskara) A task management library for AI agents
+- [Skillpacks](https://github.com/agentsea/skillpacks) A library to fine tune AI agents on tasks.
+- [Surfkit](https://github.com/agentsea/surfkit) A platform for AI agents
+
 ## Backends
 
 Thread and prompt storage can be backed by:
@@ -133,4 +141,17 @@ DB_NAME=mllm
 DB_HOST=localhost
 DB_USER=postgres
 DB_PASS=abc123
+```
+
+Thread image storage by default will utilize the db, to configure bucket storage using GCS:
+
+- Create a bucket with fine grained permissions
+- Create a GCP service account JSON with permissions to write to the bucket
+
+```sh
+export THREAD_STORAGE_SA_JSON='{
+  "type": "service_account",
+  ...
+}'
+export THREAD_STORAGE_BUCKET=my-bucket
 ```
