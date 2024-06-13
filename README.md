@@ -118,6 +118,20 @@ response_msg = RoleMessage.from_openai(response["choices"][0]["message"])
 saved_prompt = Prompt(thread, response_msg, namespace="foo")
 ```
 
+Add images of any variety to the thread. We support base64, filepath, PIL, and URL
+
+```python
+from PIL import Image
+
+img1 = Image.open("img1.png")
+
+thread.post(
+  role="user",
+  msg="Whats this image?",
+  images=["data:image/jpeg;base64,...", "./img1.png", img1, "https://shorturl.at/rVyAS"]
+)
+```
+
 ## Integrations
 
 MLLM is integrated with:
