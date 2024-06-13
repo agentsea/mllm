@@ -28,6 +28,16 @@
 pip install mllm
 ```
 
+### Extra dependencies
+
+Some features might require extra dependencies.
+
+For example, for the Gemini models, you can install the extra dependencies like this:
+
+```sh
+pip install mllm[gemini]
+```
+
 ## Usage
 
 Create an MLLM router with a list of preferred models
@@ -41,7 +51,7 @@ os.environ["ANTHROPIC_API_KEY"] = "..."
 os.environ["GEMINI_API_KEY"] = "..."
 
 router = Router(
-    preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-pro-vision"]
+    preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-1.5-pro-latest"]
 )
 ```
 
