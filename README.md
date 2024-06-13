@@ -51,7 +51,7 @@ os.environ["ANTHROPIC_API_KEY"] = "..."
 os.environ["GEMINI_API_KEY"] = "..."
 
 router = Router(
-    preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-pro-vision"]
+    preference=["gpt-4-turbo", "anthropic/claude-3-opus-20240229", "gemini/gemini-1.5-pro-latest"]
 )
 ```
 
