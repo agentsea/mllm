@@ -41,7 +41,7 @@ class Router:
         "gpt-4o": "OPENAI_API_KEY",
         "gpt-4-turbo": "OPENAI_API_KEY",
         "anthropic/claude-3-opus-20240229": "ANTHROPIC_API_KEY",
-        "gemini/gemini-pro-vision": "GEMINI_API_KEY",
+        "gemini/gemini-1.5-pro-latest": "GEMINI_API_KEY",
     }
 
     def __init__(
