@@ -28,6 +28,16 @@
 pip install mllm
 ```
 
+### Extra dependencies
+
+Some features might require extra dependencies.
+
+For example, for the Gemini models, you can install the extra dependencies like this:
+
+```sh
+pip install mllm[gemini]
+```
+
 ## Usage
 
 Create an MLLM router with a list of preferred models
