@@ -11,6 +11,10 @@ def test_router():
         species: str
         color: str
 
+    class Object(BaseModel):
+        name: str
+        color: str
+
     print("Schema: ", Animal.model_json_schema())
     thread.post(
         role="user",
@@ -58,3 +62,19 @@ def test_router():
     assert prompt.response_schema is None
 
     prompt.to_v1()
+
+    thread.post(
+        role="user",
+        msg=(
+            "can you describe whats in this image? "
+            "Please output the response in raw JSON "
+            f"in the following schema {Animal.model_json_schema()}"
+        ),
+        images=[
+            "https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvZnJwYW50aGVyYV90aWdyaXNfYWx0YWljYV90aWdlcl8wLWltYWdlLWt6eGx2YzYyLmpwZw.jpg"
+        ],
+    )
+
+    response = router.chat_multi(thread, expect_one=[Animal, Object])
+    assert len(prompts) == 1
+    assert type(response.parsed) == Animal
