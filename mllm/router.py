@@ -2,10 +2,10 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from typing import Dict, Generic, List, Optional, Type, TypeVar
+from typing import Dict, Generic, List, Optional, Type, TypeVar, Tuple
 
-from litellm import ModelResponse
-from litellm import Router as LLMRouter
+from litellm import ModelResponse  # type: ignore
+from litellm import Router as LLMRouter  # type: ignore
 from litellm._logging import handler
 from pydantic import BaseModel
 from tenacity import before_sleep_log, retry, stop_after_attempt
@@ -135,6 +135,8 @@ class Router:
         namespace: str = "default",
         expect: Optional[Type[T]] = None,
         retries: int = 3,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
         agent_id: Optional[str] = None,
         owner_id: Optional[str] = None,
     ) -> ChatResponse[T]:
@@ -146,6 +148,8 @@ class Router:
             namespace (Optional[str], optional): Namespace to log into. Defaults to "default".
             expect (Optional[Type[T]], optional): Model type to expect response to conform to. Defaults to None.
             retries (int, optional): Number of retries if model fails. Defaults to 3.
+            temperature (Optional[float], optional): Temperature for the model. Defaults to None.
+            top_p (Optional[float], optional): Top P for the model. Defaults to None.
             agent_id (Optional[str], optional): Agent ID for logging. Defaults to None.
             owner_id (Optional[str], optional): Owner ID for logging. Defaults to None.
 
@@ -164,9 +168,18 @@ class Router:
             model: str,
             namespace: str = "default",
             expect: Optional[Type[T]] = None,
+            temperature: Optional[float] = None,
+            top_p: Optional[float] = None,
         ) -> ChatResponse[T]:
+
             start = time.time()
-            response = self.router.completion(model, thread.to_openai())
+
+            response = self.router.completion(
+                model,
+                thread.to_openai(),
+                temperature=temperature,
+                top_p=top_p,
+            )
 
             if not isinstance(response, ModelResponse):
                 raise Exception(f"Unexpected response type: {type(response)}")
@@ -211,7 +224,121 @@ class Router:
 
             return out
 
-        return call_llm(thread, model, namespace, expect)
+        return call_llm(thread, model, namespace, expect, temperature, top_p)
+
+    def chat_multi(
+        self,
+        thread: RoleThread,
+        model: Optional[str] = None,
+        namespace: str = "default",
+        expect_one: Optional[List[Type[BaseModel]]] = None,
+        retries: int = 3,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        agent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
+    ) -> ChatResponse[BaseModel]:
+        """
+        Chat with a language model expecting multiple possible types
+
+        Args:
+            thread (RoleThread): A role thread
+            model (Optional[str], optional): Model to use. Defaults to None.
+            namespace (str, optional): Namespace to log into. Defaults to "default".
+            expect_one (List[Type[BaseModel]]): List of model types to expect, will return one of them.
+            retries (int, optional): Number of retries if model fails. Defaults to 3.
+            temperature (Optional[float], optional): Temperature for the model. Defaults to None.
+            top_p (Optional[float], optional): Top P for the model. Defaults to None.
+            agent_id (Optional[str], optional): Agent ID for logging. Defaults to None.
+            owner_id (Optional[str], optional): Owner ID for logging. Defaults to None.
+
+        Returns:
+            Tuple[ChatResponse[BaseModel], Type[BaseModel]]: A tuple containing the chat response and the type of the parsed object
+        """
+        if not model:
+            model = self.model
+
+        if not expect_one:
+            raise ValueError("At least one expected type must be provided")
+
+        @retry(
+            stop=stop_after_attempt(retries),
+            before_sleep=before_sleep_log(logger, logging.ERROR),
+        )
+        def call_llm_multi(
+            thread: RoleThread,
+            model: str,
+            namespace: str = "default",
+            expect_one: Optional[List[Type[BaseModel]]] = None,
+            temperature: Optional[float] = None,
+            top_p: Optional[float] = None,
+        ) -> ChatResponse[BaseModel]:
+
+            start = time.time()
+
+            response = self.router.completion(
+                model,
+                thread.to_openai(),
+                temperature=temperature,
+                top_p=top_p,
+            )
+
+            if not isinstance(response, ModelResponse):
+                raise Exception(f"Unexpected response type: {type(response)}")
+
+            end = time.time()
+
+            elapsed = end - start
+
+            logger.debug(f"llm response: {response.__dict__}")
+
+            msg = response["choices"][0]["message"].model_dump()
+            content = msg["content"]
+
+            response_obj = None
+            matched_type = None
+            if expect_one:
+                for expected_type in expect_one:
+                    try:
+                        response_obj = expected_type.model_validate(
+                            extract_parse_json(content)
+                        )
+                        matched_type = expected_type
+                        break
+                    except Exception:
+                        continue
+
+            if response_obj is None:
+                logger.error(
+                    f"Failed to validate against any of the expected types for '{content}'"
+                )
+                raise ValueError("Response did not match any of the expected types")
+
+            resp_msg = RoleMessage(role=msg["role"], text=content)
+
+            prompt = Prompt(
+                thread=thread,
+                response=resp_msg,
+                response_schema=matched_type,  # type: ignore
+                namespace=namespace,
+                agent_id=agent_id,
+                owner_id=owner_id,
+                model=response.model or model,
+            )
+
+            out = ChatResponse(
+                model=response.model or model,
+                msg=resp_msg,
+                parsed=response_obj,
+                time_elapsed=elapsed,
+                tokens_request=response.usage.prompt_tokens,  # type: ignore
+                tokens_response=response.usage.completion_tokens,  # type: ignore
+                prompt=prompt,
+            )
+
+            return out
+
+        return call_llm_multi(thread, model, namespace, expect_one, temperature, top_p)
 
     def check_model(self) -> None:
         """Check if the model is available"""
