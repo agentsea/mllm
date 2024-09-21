@@ -11,6 +11,7 @@ from threadmem.server.models import V1RoleMessage, V1RoleThread
 from .db.conn import WithDB
 from .db.models import PromptRecord
 from .models import V1Prompt
+from .img import convert_images
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,9 @@ class Prompt(WithDB):
         # Serialize the response using RoleMessageModel's json() method
         if not self.metadata:
             self.metadata = {}
+
+        for msg in self._thread._messages:
+            msg.images = convert_images(msg.images)  # type: ignore
 
         return PromptRecord(
             id=self._id,
