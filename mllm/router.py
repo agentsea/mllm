@@ -171,7 +171,6 @@ class Router:
             temperature: Optional[float] = None,
             top_p: Optional[float] = None,
         ) -> ChatResponse[T]:
-
             start = time.time()
 
             response = self.router.completion(
@@ -273,7 +272,6 @@ class Router:
             temperature: Optional[float] = None,
             top_p: Optional[float] = None,
         ) -> ChatResponse[BaseModel]:
-
             start = time.time()
 
             response = self.router.completion(
