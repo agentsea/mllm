@@ -119,10 +119,8 @@ def upload_image_to_gcs(image_data: bytes, mime_type: str) -> str:
 
 def convert_images(images: List[str | Image.Image]) -> List[str]:
     sa = os.getenv(STORAGE_SA_JSON_ENV)
-    print("sa: ", sa)
     new_imgs: List[str] = []
     if sa:
-        print("sa is set")
         for img in images:
             if isinstance(img, Image.Image):
                 new_imgs.append(image_to_b64(img))
