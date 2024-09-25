@@ -126,16 +126,13 @@ def convert_images(images: List[str | Image.Image]) -> List[str]:
                 new_imgs.append(image_to_b64(img))
             elif isinstance(img, str):
                 if img.startswith("data:"):
-                    print("image is a data url")
                     mime_type, base64_data = parse_image_data(img)
                     image_data = base64.b64decode(base64_data)
                     public_url = upload_image_to_gcs(image_data, mime_type)
                     new_imgs.append(public_url)
                 elif img.startswith("https://"):
-                    print("image is a url")
                     new_imgs.append(img)
                 else:
-                    print("image is a local file")
                     loaded_img = Image.open(img)
                     b64_img = image_to_b64(loaded_img)
                     mime_type, base64_data = parse_image_data(b64_img)
@@ -145,7 +142,6 @@ def convert_images(images: List[str | Image.Image]) -> List[str]:
             else:
                 raise ValueError("unnknown image type")
     else:
-        print("sa is not set")
         for img in images:
             if isinstance(img, Image.Image):
                 new_imgs.append(image_to_b64(img))
