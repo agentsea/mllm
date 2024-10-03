@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from typing import Dict, Generic, List, Optional, Type, TypeVar, Tuple
+from typing import Dict, Generic, List, Optional, Type, TypeVar
 
 from litellm import ModelResponse  # type: ignore
 from litellm import Router as LLMRouter  # type: ignore
