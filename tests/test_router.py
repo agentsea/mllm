@@ -37,7 +37,7 @@ def test_router():
     assert len(prompts) == 1
 
     prompt = prompts[0]
-    assert prompt.response == response.msg
+    assert prompt.response.text == response.msg.text
     assert prompt.response_schema is not None
     assert prompt.response_schema == Animal.model_json_schema()
 
@@ -58,7 +58,7 @@ def test_router():
     assert len(prompts) == 1
 
     prompt = prompts[0]
-    assert prompt.response == response.msg
+    assert prompt.response.text == response.msg.text
     assert prompt.response_schema is None
 
     prompt.to_v1()
