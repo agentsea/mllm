@@ -82,7 +82,7 @@ class Animal(BaseModel):
 
 thread.post(
     role="user",
-    msg=f"What animal is in this image? Please output as schema {Animal.model_json_schema()}"
+    msg=f"What animal is in this image? Please output as schema {Animal.model_json_schema()}",
     images=["data:image/jpeg;base64,..."]
 )
 
@@ -102,7 +102,7 @@ Prompt.find(id="456)
 To store a raw openai prompt
 
 ```python
-from mllm import Prompt, RoleThread
+from mllm import Prompt, RoleThread, RoleMessage
 
 thread = RoleThread()
 
