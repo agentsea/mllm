@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from typing import Dict, Generic, List, Optional, Type, TypeVar
+from typing import Dict, Generic, List, Optional, Type, TypeVar, Generator, Union
 
 from litellm import ModelResponse  # type: ignore
 from litellm import Router as LLMRouter  # type: ignore
@@ -30,6 +30,14 @@ class ChatResponse(Generic[T]):
     tokens_response: int
     prompt: Prompt
     parsed: Optional[T] = None
+
+
+@dataclass
+class StreamingResponseMessage(Generic[T]):
+    model: str
+    msg: str  # Changed to str
+    time_elapsed: float
+    tokens_response: int
 
 
 class Router:
@@ -398,3 +406,108 @@ class Router:
             raise ValueError("No API keys found in environment variables.")
 
         return cls(available_providers)
+
+    def stream_chat(
+        self,
+        thread: RoleThread,
+        model: Optional[str] = None,
+        namespace: str = "default",
+        expect: Optional[Type[T]] = None,
+        retries: int = 3,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        agent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
+    ) -> Generator[Union[StreamingResponseMessage, ChatResponse[T]], None, None]:
+        """
+        Stream chat with a language model
+
+        Args:
+            thread (RoleThread): A role thread
+            model (Optional[str], optional): Model to use. Defaults to None.
+            namespace (str, optional): Namespace to log into. Defaults to "default".
+            expect (Optional[Type[T]], optional): Model type to expect response to conform to. Defaults to None.
+            retries (int, optional): Number of retries if model fails. Defaults to 3.
+            temperature (Optional[float], optional): Temperature for the model. Defaults to None.
+            top_p (Optional[float], optional): Top P for the model. Defaults to None.
+            agent_id (Optional[str], optional): Agent ID for logging. Defaults to None.
+            owner_id (Optional[str], optional): Owner ID for logging. Defaults to None.
+
+        Yields:
+            Union[StreamingResponseMessage, ChatResponse[T]]: Streamed chat responses and final chat response
+        """
+        if not model:
+            model = self.model
+
+        @retry(
+            stop=stop_after_attempt(retries),
+            before_sleep=before_sleep_log(logger, logging.ERROR),
+        )
+        def call_llm_stream(
+            thread: RoleThread,
+            model: str,
+            namespace: str = "default",
+            expect: Optional[Type[T]] = None,
+            temperature: Optional[float] = None,
+            top_p: Optional[float] = None,
+        ) -> Generator[Union[StreamingResponseMessage, ChatResponse[T]], None, None]:
+            start = time.time()
+
+            response = self.router.completion(
+                model,
+                thread.to_openai(),
+                temperature=temperature,
+                top_p=top_p,
+                stream=True,  # Enable streaming
+            )
+
+            content = ""
+            tokens_response = 0
+
+            for chunk in response:
+                delta_content = chunk.choices[0].delta.content or ""  # type: ignore
+                content += delta_content
+                tokens_response += 1  # Approximate token count
+
+                # Yield only the new chunk as a string
+                streaming_response = StreamingResponseMessage(
+                    model=model,
+                    msg=delta_content,  # Changed to string
+                    time_elapsed=time.time() - start,
+                    tokens_response=tokens_response,
+                )
+                yield streaming_response
+
+            # After streaming completes, attempt to parse the full content
+            response_obj = None
+            if expect:
+                try:
+                    response_obj = expect.model_validate(extract_parse_json(content))
+                except Exception as e:
+                    logger.error(f"Validation error: {e} for '{content}'")
+                    raise
+
+            # Create final ChatResponse with parsed content
+            final_resp_msg = RoleMessage(role="assistant", text=content)
+            prompt = Prompt(
+                thread=thread,
+                response=final_resp_msg,
+                response_schema=expect,
+                namespace=namespace,
+                agent_id=agent_id,
+                owner_id=owner_id,
+                model=model,
+            )
+
+            final_chat_response = ChatResponse(
+                model=model,
+                msg=final_resp_msg,
+                parsed=response_obj if expect else None,
+                time_elapsed=time.time() - start,
+                tokens_request=0,  # Update if possible
+                tokens_response=tokens_response,
+                prompt=prompt,
+            )
+            yield final_chat_response
+
+        return call_llm_stream(thread, model, namespace, expect, temperature, top_p)
