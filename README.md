@@ -22,12 +22,6 @@
   <br>
 </p>
 
-## Overview
-
-MLLM is a framework for serving, tuning, and utilizing multimodal large language models.
-
-We aim to support the best models for multimodal agents.
-
 ## Installation
 
 ```sh

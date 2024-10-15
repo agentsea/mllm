@@ -35,7 +35,7 @@ class ChatResponse(Generic[T]):
 @dataclass
 class StreamingResponseMessage(Generic[T]):
     model: str
-    msg: str  # Changed to str
+    msg: str
     time_elapsed: float
     tokens_response: int
 
