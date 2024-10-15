@@ -87,6 +87,15 @@ class Router:
                             },
                         }
                     )
+            else:
+                self.model_list.append(
+                    {
+                        "model_name": provider,
+                        "litellm_params": {
+                            "model": provider,
+                        },
+                    }
+                )
 
         if len(self.model_list) == 0:
             raise Exception("No valid API keys found for the specified providers.")

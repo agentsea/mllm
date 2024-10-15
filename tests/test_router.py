@@ -160,3 +160,17 @@ def test_router_stream_chat():
     prompt = prompts[0]
     assert prompt.response.text == parsed_response.msg.text
     assert prompt.response_schema == Animal.model_json_schema()
+
+
+def test_router_chat_dynamic_model():
+    router = Router("o1-mini")
+    thread = RoleThread()
+
+    thread.post(
+        role="user",
+        msg="Whats the capital of France?",
+    )
+
+    response = router.chat(thread)
+
+    print("\nStreamed dynamic final response:", response.msg.text)
