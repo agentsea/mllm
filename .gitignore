@@ -163,3 +163,4 @@ cython_debug/
 scratch.ipynb
 .data/
 .agentsea/
+playground.ipynb
