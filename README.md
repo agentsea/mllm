@@ -142,6 +142,26 @@ thread.post(
 )
 ```
 
+### Custom vLLM endpoints
+
+Custom endpoints are supported. They can be added to a `Router` instance with the `RouterConfig`:
+
+```python
+from mllm import RouterConfig
+custom_model = RouterConfig(
+    model="hosted_vllm/allenai/Molmo-7B-D-0924", # needs to have the `hosted_vllm` prefix
+    api_base="https://hosted-vllm-api.co", # set your api base here
+    api_key_name="MOLMO_API_KEY" # add the api key name -- this will be searched for in your env
+)
+router = Router(custom_model)
+```
+
+You can also mix the models:
+
+```python
+router = Router([custom_model, "gpt-4-turbo"])
+```
+
 ## Integrations
 
 MLLM is integrated with:
