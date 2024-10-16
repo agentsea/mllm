@@ -1,9 +1,11 @@
 from typing import Generator, Union
 
+import pytest
+
 from threadmem import RoleThread
 from pydantic import BaseModel
 
-from mllm import Router, Prompt, ChatResponse, StreamingResponseMessage
+from mllm import Router, Prompt, ChatResponse, StreamingResponseMessage, RouterConfig
 
 
 def test_router():
@@ -174,3 +176,63 @@ def test_router_chat_dynamic_model():
     response = router.chat(thread)
 
     print("\nStreamed dynamic final response:", response.msg.text)
+
+
+def test_router_custom_model():
+    custom_model = RouterConfig(
+        model="hosted_vllm/allenai/Molmo-7B-D-0924",
+        api_base="https://models.agentlabs.xyz/v1",
+        api_key_name="MOLMO_API_KEY"
+    )
+    router = Router(custom_model)
+    thread = RoleThread()
+
+    thread.post(
+        role="user",
+        msg="point to the statue",
+        images=["https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"]
+    )
+
+    response = router.chat(thread)
+    print(f"\nCustom model response: {response.msg.text}")
+    
+    assert response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
+    assert len(response.msg.text) > 0
+
+def test_router_mixed_models():
+    custom_model = RouterConfig(
+        model="hosted_vllm/allenai/Molmo-7B-D-0924",
+        api_base="https://models.agentlabs.xyz/v1",
+        api_key_name="MOLMO_API_KEY"
+    )
+    router = Router([custom_model, "gpt-4-turbo"])
+    thread = RoleThread()
+
+    # Test with custom model
+    thread.post(
+        role="user",
+        msg="point to the statue",
+        images=["https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"]
+    )
+
+    response = router.chat(thread)
+    print(f"\nMixed models - Custom model response: {response.msg.text}")
+    
+    assert response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
+    assert len(response.msg.text) > 0
+
+    # Test with standard model
+    thread.post(
+        role="user",
+        msg="What's the capital of France?"
+    )
+
+    response = router.chat(thread, model="gpt-4-turbo")
+    print(f"\nMixed models - Standard model response: {response.msg.text}")
+    
+    assert response.model == "gpt-4-turbo-2024-04-09"
+    assert "Paris" in response.msg.text
+
+def test_router_unsupported_model():
+    with pytest.raises(Exception):
+        Router("unsupported_model")

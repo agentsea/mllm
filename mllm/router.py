@@ -40,6 +40,13 @@ class StreamingResponseMessage(Generic[T]):
     tokens_response: int
 
 
+class RouterConfig:
+    def __init__(self, model: str, api_base: Optional[str] = None, api_key_name: Optional[str] = None):
+        self.model = model
+        self.api_base = api_base
+        self.api_key_name = api_key_name
+
+
 class Router:
     """
     A multimodal chat provider
@@ -53,10 +60,9 @@ class Router:
         "anthropic/claude-3-5-sonnet-20240620": "ANTHROPIC_API_KEY",
         "gemini/gemini-1.5-pro-latest": "GEMINI_API_KEY",
     }
-
     def __init__(
         self,
-        preference: List[str] | str,
+        preference: Union[List[str], str, List[RouterConfig], RouterConfig],
         timeout: int = 30,
         allow_fails: int = 1,
         num_retries: int = 3,
@@ -64,38 +70,21 @@ class Router:
         self.model_list = []
         fallbacks = []
 
-        if len(preference) == 0:
+        if not preference:
             raise Exception("No chat providers specified.")
 
-        if isinstance(preference, str):
+        if isinstance(preference, str) or isinstance(preference, RouterConfig):
             preference = [preference]
 
-        self.model = preference[0]
+        self.model = preference[0] if isinstance(preference[0], str) else preference[0].model
 
-        # Construct the model list based on provided preferences and available API keys
-        for provider in preference:
-            api_key_env = self.provider_api_keys.get(provider)
-            if api_key_env:
-                api_key = os.getenv(api_key_env)
-                if api_key:
-                    self.model_list.append(
-                        {
-                            "model_name": provider,
-                            "litellm_params": {
-                                "model": provider,
-                                "api_key": api_key,
-                            },
-                        }
-                    )
+        for item in preference:
+            if isinstance(item, str):
+                self._add_default_model(item)
+            elif isinstance(item, RouterConfig):
+                self._add_custom_model(item)
             else:
-                self.model_list.append(
-                    {
-                        "model_name": provider,
-                        "litellm_params": {
-                            "model": provider,
-                        },
-                    }
-                )
+                raise ValueError(f"Unsupported preference type: {type(item)}")
 
         if len(self.model_list) == 0:
             raise Exception("No valid API keys found for the specified providers.")
@@ -127,6 +116,42 @@ class Router:
         verbose_logger = logging.getLogger("LiteLLM")
         verbose_logger.setLevel(logging.ERROR)
         handler.setLevel(logging.ERROR)
+
+    def _add_default_model(self, provider: str):
+        api_key_env = self.provider_api_keys.get(provider)
+        if api_key_env:
+            provider_api_key = os.getenv(api_key_env)
+            self.model_list.append(
+                {
+                    "model_name": provider,
+                    "litellm_params": {
+                        "model": provider,
+                        "api_key": provider_api_key,
+                    },
+                }
+            )
+        else:
+            self.model_list.append(
+                {
+                    "model_name": provider,
+                    "litellm_params": {
+                        "model": provider,
+                    },
+                }
+            )
+
+    def _add_custom_model(self, config: RouterConfig):
+        api_key = os.getenv(config.api_key_name) if config.api_key_name else None
+        model_config = {
+            "model_name": config.model,
+            "litellm_params": {
+                "model": config.model,
+                "api_base": config.api_base,
+            }
+        }
+        if api_key:
+            model_config["litellm_params"]["api_key"] = api_key
+        self.model_list.append(model_config)
 
     @classmethod
     def all_opts(cls) -> List[V1MLLMOption]:
@@ -389,32 +414,22 @@ class Router:
         """
         Class method to create an LLMProvider instance based on the API keys available in the environment variables.
         """
-        available_providers = []
-
         preference_data = os.getenv("MODEL_PREFERENCE")
-        preference = None
         if preference_data:
-            preference = preference_data.split(",")
-        if not preference:
-            preference = cls.provider_api_keys.keys()
+            preference = []
+            for item in preference_data.split(","):
+                parts = item.split("|")
+                if len(parts) == 1:
+                    preference.append(parts[0].strip())
+                elif len(parts) == 3:
+                    model, api_base, api_key_name = [p.strip() for p in parts]
+                    preference.append(RouterConfig(model, api_base, api_key_name))
+                else:
+                    raise ValueError(f"Invalid MODEL_PREFERENCE format: {item}")
+        else:
+            preference = list(cls.provider_api_keys.keys())
 
-        logger.info(f"loading models with preference: {preference}")
-        for provider in preference:
-            env_var = cls.provider_api_keys.get(provider)
-            if not env_var:
-                raise ValueError(
-                    f"Invalid provider '{provider}' specified in MODEL_PREFERENCE."
-                )
-            if os.getenv(env_var):
-                logger.info(
-                    f"Found LLM provider '{provider}' API key in environment variables."
-                )
-                available_providers.append(provider)
-
-        if not available_providers:
-            raise ValueError("No API keys found in environment variables.")
-
-        return cls(available_providers)
+        return cls(preference)
 
     def stream_chat(
         self,
