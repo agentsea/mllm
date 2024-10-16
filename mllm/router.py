@@ -7,7 +7,7 @@ from typing import Dict, Generic, List, Optional, Type, TypeVar, Generator, Unio
 from litellm import ModelResponse  # type: ignore
 from litellm import Router as LLMRouter  # type: ignore
 from litellm._logging import handler
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from tenacity import before_sleep_log, retry, stop_after_attempt
 from threadmem import RoleMessage, RoleThread
 
@@ -40,11 +40,10 @@ class StreamingResponseMessage(Generic[T]):
     tokens_response: int
 
 
-class RouterConfig:
-    def __init__(self, model: str, api_base: Optional[str] = None, api_key_name: Optional[str] = None):
-        self.model = model
-        self.api_base = api_base
-        self.api_key_name = api_key_name
+class RouterConfig(BaseModel):
+    model: str
+    api_base: Optional[str] = Field(default=None)
+    api_key_name: Optional[str] = Field(default=None)
 
 
 class Router:
@@ -541,3 +540,4 @@ class Router:
             yield final_chat_response
 
         return call_llm_stream(thread, model, namespace, expect, temperature, top_p)
+
