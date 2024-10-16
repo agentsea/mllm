@@ -141,7 +141,13 @@ class Router:
             )
 
     def _add_custom_model(self, config: RouterConfig):
-        api_key = os.getenv(config.api_key_name) if config.api_key_name else None
+        if config.api_key_name:
+            api_key = os.getenv(config.api_key_name)
+            if not api_key:
+                raise ValueError(f"API key not found for environment variable: {config.api_key_name}")
+        else:
+            api_key = None
+
         model_config = {
             "model_name": config.model,
             "litellm_params": {
