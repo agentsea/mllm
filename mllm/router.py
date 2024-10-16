@@ -259,7 +259,6 @@ class Router:
                 logprobs=logprobs,
                 drop_params=True,
             )
-            print("response: ", response.__dict__)
 
             if not isinstance(response, ModelResponse):
                 raise Exception(f"Unexpected response type: {type(response)}")
@@ -384,7 +383,6 @@ class Router:
                 logprobs=logprobs,
                 drop_params=True,
             )
-            print("\nresponse: ", response.__dict__)
 
             if not isinstance(response, ModelResponse):
                 raise Exception(f"Unexpected response type: {type(response)}")
@@ -729,7 +727,6 @@ class Router:
             final_logits: List[Dict[str, Any]] = []
 
             for chunk in response:
-                print("\nchunk: ", chunk.__dict__)
                 from litellm.types.utils import StreamingChoices
 
                 choice: StreamingChoices = chunk.choices[0]  # type: ignore
@@ -879,7 +876,6 @@ class Router:
             final_logits: List[Dict[str, Any]] = []
 
             async for chunk in response:
-                print("\nchunk: ", chunk.__dict__)
                 from litellm.types.utils import StreamingChoices
 
                 choice: StreamingChoices = chunk.choices[0]  # type: ignore
@@ -957,12 +953,8 @@ class Router:
     def calculate_logit_metrics(self, logits: List[Dict[str, Any]]) -> V1LogitMetrics:
         entropies = []
 
-        print("\n---calculate logit metrics for: ", logits)
-
         # Calculate entropy for each token
         for token_info in logits:
-            print("token_info: ", token_info)
-
             # Calculate the entropy considering the top_logprobs
             token_entropies = []
             for top_prob_info in token_info["top_logprobs"]:
@@ -980,7 +972,7 @@ class Router:
         average_entropy = float(np.mean(entropies))
 
         # Calculate variance of entropy (verentropy)
-        verentropy = float(np.var(entropies))
+        varentropy = float(np.var(entropies))
 
         # Calculate derivative entropy
         derivative_entropies = np.diff(entropies).tolist()
@@ -988,7 +980,7 @@ class Router:
         metrics = V1LogitMetrics(
             entropies=entropies,
             average_entropy=average_entropy,
-            verentropy=verentropy,
+            varentropy=varentropy,
             derivative_entropy=derivative_entropies,
         )
 

@@ -7,7 +7,7 @@ from threadmem.server.models import V1RoleThread, V1RoleMessage
 class V1LogitMetrics(BaseModel):
     entropies: List[float]
     average_entropy: float
-    verentropy: float
+    varentropy: float
     derivative_entropy: List[float]
 
 
