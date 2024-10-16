@@ -4,6 +4,13 @@ from pydantic import BaseModel
 from threadmem.server.models import V1RoleThread, V1RoleMessage
 
 
+class V1LogitMetrics(BaseModel):
+    entropies: List[float]
+    average_entropy: float
+    verentropy: float
+    derivative_entropy: List[float]
+
+
 class V1Prompt(BaseModel):
     """An LLM prompt model"""
 
@@ -19,6 +26,9 @@ class V1Prompt(BaseModel):
     agent_id: Optional[str] = None
     model: Optional[str] = None
     owner_id: Optional[str] = None
+    logits: Optional[List[Dict[str, Any]]] = None
+    logit_metrics: Optional[V1LogitMetrics] = None
+    temperature: Optional[float] = None
 
 
 class V1EnvVarOpt(BaseModel):

@@ -21,3 +21,6 @@ class PromptRecord(Base):
     model = Column(String, nullable=True)
     created = Column(Float, default=time.time)
     owner_id = Column(String, nullable=True)
+    logits = Column(Text, nullable=True)
+    logit_metrics = Column(Text, nullable=True)
+    temperature = Column(Float, nullable=True)

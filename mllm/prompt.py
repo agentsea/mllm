@@ -10,7 +10,7 @@ from threadmem.server.models import V1RoleMessage, V1RoleThread
 
 from .db.conn import WithDB
 from .db.models import PromptRecord
-from .models import V1Prompt
+from .models import V1Prompt, V1LogitMetrics
 from .img import convert_images
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,9 @@ class Prompt(WithDB):
         owner_id: Optional[str] = None,
         agent_id: Optional[str] = None,
         model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        logits: Optional[List[Dict[str, Any]]] = None,
+        logit_metrics: Optional[V1LogitMetrics] = None,
     ):
         self._id = str(uuid.uuid4())
         self._namespace = namespace
@@ -46,6 +49,9 @@ class Prompt(WithDB):
         self._owner_id = owner_id
         self._agent_id = agent_id
         self._model = model
+        self._temperature = temperature
+        self._logits = logits
+        self._logit_metrics = logit_metrics
 
         self.save()
 
@@ -141,6 +147,22 @@ class Prompt(WithDB):
     def model(self, value: str):
         self._model = value
 
+    @property
+    def logits(self) -> Optional[List[Dict[str, Any]]]:
+        return self._logits
+
+    @logits.setter
+    def logits(self, value: List[Dict[str, Any]]):
+        self._logits = value
+
+    @property
+    def temperature(self) -> Optional[float]:
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value: float):
+        self._temperature = value
+
     def to_record(self) -> PromptRecord:
         # Serialize the response using RoleMessageModel's json() method
         if not self.metadata:
@@ -164,6 +186,13 @@ class Prompt(WithDB):
             agent_id=self._agent_id,
             model=self._model,
             owner_id=self._owner_id,
+            logits=json.dumps(self._logits)  # type: ignore
+            if self.logits
+            else None,
+            logit_metrics=self._logit_metrics.model_dump_json()
+            if self._logit_metrics
+            else None,
+            temperature=self._temperature,
         )
 
     @classmethod
@@ -183,6 +212,14 @@ class Prompt(WithDB):
         # Load metadata
         metadata = json.loads(record.metadata_) if record.metadata_ else {}  # type: ignore
 
+        logits = None
+        if record.logits:  # type: ignore
+            logits = json.loads(record.logits)  # type: ignore
+
+        logit_metrics = None
+        if record.logit_metrics:  # type: ignore
+            logit_metrics = V1LogitMetrics.model_validate_json(record.logit_metrics)  # type: ignore
+
         obj = cls.__new__(cls)
         obj._id = record.id
         obj._namespace = record.namespace
@@ -196,6 +233,9 @@ class Prompt(WithDB):
         obj._agent_id = record.agent_id
         obj._model = record.model
         obj._owner_id = record.owner_id
+        obj._logits = logits
+        obj._logit_metrics = logit_metrics
+        obj._temperature = record.temperature
 
         return obj
 
@@ -213,6 +253,9 @@ class Prompt(WithDB):
             agent_id=self._agent_id,
             model=self._model,
             owner_id=self._owner_id,
+            logits=self._logits,
+            logit_metrics=self._logit_metrics,
+            temperature=self._temperature,
         )
 
     @classmethod
@@ -231,6 +274,9 @@ class Prompt(WithDB):
         obj._agent_id = v1.agent_id
         obj._model = v1.model
         obj._owner_id = v1.owner_id
+        obj._logits = v1.logits
+        obj._logit_metrics = v1.logit_metrics
+        obj._temperature = v1.temperature
 
         return obj
 
