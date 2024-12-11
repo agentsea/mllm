@@ -3399,13 +3399,13 @@ test = ["pytest", "tornado (>=4.5)", "typeguard"]
 
 [[package]]
 name = "threadmem"
-version = "0.2.34"
+version = "0.2.35"
 description = "Thread memory for AI agents"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "threadmem-0.2.34-py3-none-any.whl", hash = "sha256:6d7c8e2ecfe1f56a95f6a4ff0daf1ac25fddb5cdf30942f76fd28b53d8d162b2"},
-    {file = "threadmem-0.2.34.tar.gz", hash = "sha256:098a3b72d415a0b2ccc0fa38cd05e68d06c01577749863c2a40f467219db2bc6"},
+    {file = "threadmem-0.2.35-py3-none-any.whl", hash = "sha256:fceca90dd63ac809a85968617753ee2a81a5f7dbb280b86ee9ec91f820d98840"},
+    {file = "threadmem-0.2.35.tar.gz", hash = "sha256:0819c64dfb6e9565d0f1e4d7b1c9b92dbc62dca68dee2d5ce3ec18836bf4cecb"},
 ]
 
 [package.dependencies]
@@ -4158,4 +4158,4 @@ gemini = ["google-generativeai"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a1c3fef81c5fffc12b7b7e4244cb3f53274913effb97d85262d1cd9c5fb43fb6"
+content-hash = "cb29f45121afa0866aa699670a4ca8d00257e5087054c214beb7408321e6fcea"
