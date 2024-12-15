@@ -74,6 +74,7 @@ class Router:
         "anthropic/claude-3-opus-20240229": "ANTHROPIC_API_KEY",
         "anthropic/claude-3-5-sonnet-20240620": "ANTHROPIC_API_KEY",
         "gemini/gemini-1.5-pro-latest": "GEMINI_API_KEY",
+        "gemini/gemini-pro": "GEMINI_API_KEY",
     }
 
     def __init__(
@@ -254,8 +255,8 @@ class Router:
                 thread.to_openai(),
                 temperature=temperature,
                 top_p=top_p,
-                top_logprobs=top_logprobs,
-                logprobs=logprobs,
+                # top_logprobs=top_logprobs,
+                # logprobs=logprobs,
                 drop_params=True,
             )
 
@@ -378,8 +379,8 @@ class Router:
                 thread.to_openai(),
                 temperature=temperature,
                 top_p=top_p,
-                top_logprobs=top_logprobs,
-                logprobs=logprobs,
+                # top_logprobs=top_logprobs,
+                # logprobs=logprobs,
                 drop_params=True,
             )
 
@@ -522,8 +523,8 @@ class Router:
                 thread.to_openai(),
                 temperature=temperature,
                 top_p=top_p,
-                top_logprobs=top_logprobs,
-                logprobs=logprobs,
+                # top_logprobs=top_logprobs,
+                # logprobs=logprobs,
                 drop_params=True,
             )
 
@@ -716,8 +717,8 @@ class Router:
                 temperature=temperature,
                 top_p=top_p,
                 stream=True,
-                top_logprobs=top_logprobs,
-                logprobs=logprobs,
+                # top_logprobs=top_logprobs,
+                # logprobs=logprobs, # TODO: not supported by Gemini
                 drop_params=True,
             )
 
@@ -865,8 +866,8 @@ class Router:
                 temperature=temperature,
                 top_p=top_p,
                 stream=True,  # Enable streaming
-                top_logprobs=top_logprobs,
-                logprobs=logprobs,
+                # top_logprobs=top_logprobs,
+                # logprobs=logprobs,
                 drop_params=True,
             )
 

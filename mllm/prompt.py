@@ -10,8 +10,8 @@ from threadmem.server.models import V1RoleMessage, V1RoleThread
 
 from .db.conn import WithDB
 from .db.models import PromptRecord
-from .models import V1Prompt, V1LogitMetrics
 from .img import convert_images
+from .models import V1LogitMetrics, V1Prompt
 
 logger = logging.getLogger(__name__)
 
@@ -212,13 +212,13 @@ class Prompt(WithDB):
         # Load metadata
         metadata = json.loads(record.metadata_) if record.metadata_ else {}  # type: ignore
 
-        logits = None
-        if record.logits:  # type: ignore
-            logits = json.loads(record.logits)  # type: ignore
+        # logits = None
+        # if record.logits:  # type: ignore
+        #     logits = json.loads(record.logits)  # type: ignore
 
-        logit_metrics = None
-        if record.logit_metrics:  # type: ignore
-            logit_metrics = V1LogitMetrics.model_validate_json(record.logit_metrics)  # type: ignore
+        # logit_metrics = None
+        # if record.logit_metrics:  # type: ignore
+        #     logit_metrics = V1LogitMetrics.model_validate_json(record.logit_metrics)  # type: ignore
 
         obj = cls.__new__(cls)
         obj._id = record.id
@@ -233,8 +233,8 @@ class Prompt(WithDB):
         obj._agent_id = record.agent_id
         obj._model = record.model
         obj._owner_id = record.owner_id
-        obj._logits = logits
-        obj._logit_metrics = logit_metrics
+        obj._logits = None
+        obj._logit_metrics = None
         obj._temperature = record.temperature
 
         return obj
