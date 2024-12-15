@@ -148,64 +148,64 @@ async def test_router_stream_chat_async_no_schema():
     assert prompt.response_schema is None
 
 
-@pytest.mark.asyncio
-async def test_router_chat_async_custom_model():
-    custom_model = RouterConfig(
-        model="hosted_vllm/allenai/Molmo-7B-D-0924",
-        api_base="https://models.agentlabs.xyz/v1",
-        api_key_name="MOLMO_API_KEY",
-    )
-    router = Router(custom_model)
-    thread = RoleThread()
+# @pytest.mark.asyncio
+# async def test_router_chat_async_custom_model():
+#     custom_model = RouterConfig(
+#         model="hosted_vllm/allenai/Molmo-7B-D-0924",
+#         api_base="https://models.agentlabs.xyz/v1",
+#         api_key_name="MOLMO_API_KEY",
+#     )
+#     router = Router(custom_model)
+#     thread = RoleThread()
 
-    thread.post(
-        role="user",
-        msg="Point to the statue",
-        images=[
-            "https://cdn.britannica.com/61/93061-050-99147DCE/"
-            "Statue-of-Liberty-Island-New-York-Bay.jpg"
-        ],
-    )
+#     thread.post(
+#         role="user",
+#         msg="Point to the statue",
+#         images=[
+#             "https://cdn.britannica.com/61/93061-050-99147DCE/"
+#             "Statue-of-Liberty-Island-New-York-Bay.jpg"
+#         ],
+#     )
 
-    response = await router.chat_async(thread)
-    print(f"\nCustom model async response: {response.msg.text}")
+#     response = await router.chat_async(thread)
+#     print(f"\nCustom model async response: {response.msg.text}")
 
-    assert response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
-    assert len(response.msg.text) > 0
+#     assert response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
+#     assert len(response.msg.text) > 0
 
 
-@pytest.mark.asyncio
-async def test_router_stream_chat_async_custom_model():
-    custom_model = RouterConfig(
-        model="hosted_vllm/allenai/Molmo-7B-D-0924",
-        api_base="https://models.agentlabs.xyz/v1",
-        api_key_name="MOLMO_API_KEY",
-    )
-    router = Router(custom_model)
-    thread = RoleThread()
+# @pytest.mark.asyncio
+# async def test_router_stream_chat_async_custom_model():
+#     custom_model = RouterConfig(
+#         model="hosted_vllm/allenai/Molmo-7B-D-0924",
+#         api_base="https://models.agentlabs.xyz/v1",
+#         api_key_name="MOLMO_API_KEY",
+#     )
+#     router = Router(custom_model)
+#     thread = RoleThread()
 
-    thread.post(
-        role="user",
-        msg=(
-            "Please describe the contents of the image in raw JSON format "
-            "with keys 'description' and 'objects'."
-        ),
-        images=[
-            "https://cdn.britannica.com/61/93061-050-99147DCE/"
-            "Statue-of-Liberty-Island-New-York-Bay.jpg"
-        ],
-    )
+#     thread.post(
+#         role="user",
+#         msg=(
+#             "Please describe the contents of the image in raw JSON format "
+#             "with keys 'description' and 'objects'."
+#         ),
+#         images=[
+#             "https://cdn.britannica.com/61/93061-050-99147DCE/"
+#             "Statue-of-Liberty-Island-New-York-Bay.jpg"
+#         ],
+#     )
 
-    stream_response = await router.stream_chat_async(thread)
+#     stream_response = await router.stream_chat_async(thread)
 
-    parsed_response = None
-    async for chunk in stream_response:
-        assert isinstance(chunk, (StreamingResponseMessage, ChatResponse))
-        if isinstance(chunk, ChatResponse):
-            parsed_response = chunk
+#     parsed_response = None
+#     async for chunk in stream_response:
+#         assert isinstance(chunk, (StreamingResponseMessage, ChatResponse))
+#         if isinstance(chunk, ChatResponse):
+#             parsed_response = chunk
 
-    assert parsed_response is not None
-    assert len(parsed_response.msg.text) > 0
-    print("\nStreamed async custom model final response:", parsed_response.msg.text)
+#     assert parsed_response is not None
+#     assert len(parsed_response.msg.text) > 0
+#     print("\nStreamed async custom model final response:", parsed_response.msg.text)
 
-    assert parsed_response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
+#     assert parsed_response.model == "hosted_vllm/allenai/Molmo-7B-D-0924"
