@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mllm"
-version = "0.1.52"
+version = "0.1.53"
 description = "Multimodal Large Language Models"
 authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
 license = "Apache 2.0"
@@ -12,7 +12,7 @@ tenacity = "^8.2.3"
 litellm = "^1.49.4"
 google-generativeai = { version = "^0.6.0", optional = true }
 numpy = "1.26.4"
-threadmem = "^0.2.36"
+threadmem = "^0.2.37"
 
 [tool.poetry.extras]
 gemini = ["google-generativeai"]

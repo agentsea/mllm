@@ -3,28 +3,27 @@ import os
 import time
 from dataclasses import dataclass
 from typing import (
+    Any,
+    AsyncGenerator,
     Dict,
+    Generator,
     Generic,
     List,
     Optional,
     Type,
     TypeVar,
-    Generator,
     Union,
-    AsyncGenerator,
-    Any,
 )
+
 import numpy as np
-
-
 from litellm import ModelResponse  # type: ignore
 from litellm import Router as LLMRouter  # type: ignore
 from litellm._logging import handler
 from pydantic import BaseModel, Field
-from tenacity import before_sleep_log, retry, stop_after_attempt, AsyncRetrying
+from tenacity import AsyncRetrying, before_sleep_log, retry, stop_after_attempt
 from threadmem import RoleMessage, RoleThread
 
-from .models import V1EnvVarOpt, V1MLLMOption, V1LogitMetrics
+from .models import V1EnvVarOpt, V1LogitMetrics, V1MLLMOption
 from .prompt import Prompt
 from .util import extract_parse_json
 
@@ -87,7 +86,6 @@ class Router:
         num_retries: int = 3,
     ) -> None:
         self.model_list = []
-        fallbacks = []
 
         if not preference:
             raise Exception("No chat providers specified.")
@@ -99,6 +97,7 @@ class Router:
             preference[0] if isinstance(preference[0], str) else preference[0].model  # type: ignore
         )
 
+        # Add models to model_list
         for item in preference:
             if isinstance(item, str):
                 self._add_default_model(item)
@@ -110,17 +109,17 @@ class Router:
         if len(self.model_list) == 0:
             raise Exception("No valid API keys found for the specified providers.")
 
-        # Calculate fallbacks dynamically
-        for i, model in enumerate(self.model_list):
-            fallback_models = self.model_list[i + 1 :]
-            if fallback_models:
-                fallbacks.append(
-                    {
-                        model["model_name"]: [
-                            fallback["model_name"] for fallback in fallback_models
-                        ]
-                    }
-                )
+        # Create fallbacks list where each model falls back to the next model in the list
+        fallbacks = []
+        for i in range(len(self.model_list) - 1):
+            fallbacks.append(
+                {
+                    self.model_list[i]["model_name"]: [
+                        self.model_list[j]["model_name"]
+                        for j in range(i + 1, len(self.model_list))
+                    ]
+                }
+            )
 
         self.router = LLMRouter(
             model_list=self.model_list,

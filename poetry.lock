@@ -1972,13 +1972,13 @@ datalib = ["numpy (>=1)", "pandas (>=1.2.3)", "pandas-stubs (>=1.1.0.11)"]
 
 [[package]]
 name = "orign"
-version = "0.1.12"
+version = "0.1.14"
 description = "A Python client for Orign"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "orign-0.1.12-py3-none-any.whl", hash = "sha256:8799d1d65ee0f8a54792df1177e1e709144f4dd39d5b040f444757c46b99c0a7"},
-    {file = "orign-0.1.12.tar.gz", hash = "sha256:02f94d27323559b36f7a19c51012a48a695a7a58bb3552fd8a2ce1320186ed69"},
+    {file = "orign-0.1.14-py3-none-any.whl", hash = "sha256:994e5080da9787601051bf626c71f8b6b8148f22a4b54415217abf3514b319c0"},
+    {file = "orign-0.1.14.tar.gz", hash = "sha256:f4d08781da9e25a8fd40d77bfd23af9eceda0548f8967fb7e745fdb4e03d48ce"},
 ]
 
 [package.dependencies]
@@ -2637,13 +2637,13 @@ semver = ["semver (>=3.0.2)"]
 
 [[package]]
 name = "pydantic-settings"
-version = "2.6.1"
+version = "2.7.0"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_settings-2.6.1-py3-none-any.whl", hash = "sha256:7fb0637c786a558d3103436278a7c4f1cfd29ba8973238a50c5bb9a55387da87"},
-    {file = "pydantic_settings-2.6.1.tar.gz", hash = "sha256:e0f92546d8a9923cb8941689abf85d6601a8c19a23e97a34b2964a2e3f813ca0"},
+    {file = "pydantic_settings-2.7.0-py3-none-any.whl", hash = "sha256:e00c05d5fa6cbbb227c84bd7487c5c1065084119b750df7c8c1a554aed236eb5"},
+    {file = "pydantic_settings-2.7.0.tar.gz", hash = "sha256:ac4bfd4a36831a48dbf8b2d9325425b549a0a6f18cea118436d728eb4f1c4d66"},
 ]
 
 [package.dependencies]
@@ -3417,13 +3417,13 @@ test = ["pytest", "tornado (>=4.5)", "typeguard"]
 
 [[package]]
 name = "threadmem"
-version = "0.2.36"
+version = "0.2.37"
 description = "Thread memory for AI agents"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "threadmem-0.2.36-py3-none-any.whl", hash = "sha256:841379d6d6615207325a7b3d72eb8ec1d80abc3be921f879823d07832ee6cb5b"},
-    {file = "threadmem-0.2.36.tar.gz", hash = "sha256:fb63f47543c8060b033a6f9f008964cf9de793f09347e54601df156c5f395d6d"},
+    {file = "threadmem-0.2.37-py3-none-any.whl", hash = "sha256:1d5d0c4ab8345c11814ab40f5274bf2c77364c99b0033a6f3c4925fbfbcfeb3a"},
+    {file = "threadmem-0.2.37.tar.gz", hash = "sha256:5a5abfc3cc7376101a27fd996d8f020012cb1302bcddc90ab1d875050708dc18"},
 ]
 
 [package.dependencies]
@@ -3793,13 +3793,13 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "uvicorn"
-version = "0.32.1"
+version = "0.34.0"
 description = "The lightning-fast ASGI server."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "uvicorn-0.32.1-py3-none-any.whl", hash = "sha256:82ad92fd58da0d12af7482ecdb5f2470a04c9c9a53ced65b9bbb4a205377602e"},
-    {file = "uvicorn-0.32.1.tar.gz", hash = "sha256:ee9519c246a72b1c084cea8d3b44ed6026e78a4a309cbedae9c37e4cb9fbb175"},
+    {file = "uvicorn-0.34.0-py3-none-any.whl", hash = "sha256:023dc038422502fa28a09c7a30bf2b6991512da7dcdb8fd35fe57cfc154126f4"},
+    {file = "uvicorn-0.34.0.tar.gz", hash = "sha256:404051050cd7e905de2c9a7e61790943440b3416f49cb409f965d9dcd0fa73e9"},
 ]
 
 [package.dependencies]
@@ -4210,4 +4210,4 @@ gemini = ["google-generativeai"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f80daf95e34710b65775f241773a978a3d33d6f0e20bf13124feb801c60ec8f4"
+content-hash = "470e5040fbbc2df4bf351cc4dd36457f0600ca78d12d1be4065277a6fcee4990"
