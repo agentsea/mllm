@@ -101,7 +101,9 @@ class Router:
         # Add models to model_list
         for item in preference:
             if isinstance(item, str):
+                print(f"adding default model: {item}")
                 self._add_default_model(item)
+                print("added default model")
             elif isinstance(item, RouterConfig):
                 self._add_custom_model(item)
             else:
@@ -122,6 +124,7 @@ class Router:
                 }
             )
 
+        print(f"creating router with fallbacks: {fallbacks}")
         self.router = LLMRouter(
             model_list=self.model_list,
             timeout=timeout,
